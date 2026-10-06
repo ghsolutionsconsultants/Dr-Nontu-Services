@@ -1,6 +1,6 @@
 // npm run db:check: paste a connection string (hidden as you type) and see whether the database accepts it.
 // Nothing is saved or printed except the result.
-import postgres from 'postgres';
+import pg from 'pg';
 import { parseDbUrl } from '../lib/db/url';
 
 function askHidden(prompt: string): Promise<string> {
@@ -26,13 +26,14 @@ function askHidden(prompt: string): Promise<string> {
   if (/YOUR-PASSWORD|:\[.*\]@/.test(url)) { console.log('✗ The string still contains [YOUR-PASSWORD] or brackets. Put the real password in, without brackets.'); process.exit(1); }
   let cfg;
   try { cfg = parseDbUrl(url); } catch (e) { console.log('✗ ' + (e as Error).message); process.exit(1); }
-  const sql = postgres({ ...cfg, max: 1, prepare: false, ssl: 'require', connect_timeout: 15 });
+  const client = new pg.Client({ ...cfg, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
   try {
-    await sql`select 1`;
+    await client.connect();
+    await client.query('select 1');
     console.log('✓ Connected. This exact string works: paste the same into Vercel as DATABASE_URL, then redeploy.');
   } catch (e) {
     const err = e as { code?: string; message?: string };
     console.log(`✗ ${err.code ?? ''} ${String(err.message).replace(/postgres(ql)?:\/\/\S+/g, '[hidden]')}`);
     if (err.code === '28P01') console.log('  The password is wrong. Reset it in Supabase (Project Settings → Database) and try again.');
-  } finally { await sql.end({ timeout: 2 }); }
+  } finally { await client.end().catch(() => {}); }
 })();

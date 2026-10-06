@@ -21,19 +21,37 @@ const g = globalThis as unknown as { __dnDb?: Promise<Db> };
 async function connect(): Promise<Db> {
   const url = process.env.DATABASE_URL;
   if (url) {
-    const postgres = (await import('postgres')).default;
+    // node-postgres: one query at a time per connection (no pipelining), which is what
+    // Supabase's transaction pooler requires; extra queries wait in the pool's queue.
+    const pg = (await import('pg')).default;
+    pg.types.setTypeParser(1082, (v: string) => v); // DATE stays 'YYYY-MM-DD' (no timezone shifts)
     const cfg = parseDbUrl(url);
-    // serverless-friendly: fail fast instead of hanging, and let idle connections go
-    const sql = postgres({ ...cfg, max: 5, prepare: false, connect_timeout: 10, idle_timeout: 20, max_lifetime: 60 * 30,
-      ssl: /^(localhost|127\.0\.0\.1)$/.test(cfg.host) ? false : 'require' });
-    const run = (s: typeof sql) => (<T>(text: string, params: unknown[] = []) =>
-      s.unsafe(text, params as never[]) as unknown as Promise<T[]>) as Query;
+    const local = /^(localhost|127\.0\.0\.1)$/.test(cfg.host);
+    const pool = new pg.Pool({
+      ...cfg, max: Number(process.env.DB_POOL_MAX ?? 5),
+      connectionTimeoutMillis: 10_000, idleTimeoutMillis: 10_000, allowExitOnIdle: true,
+      ssl: local ? false : { rejectUnauthorized: false },
+    });
+    pool.on('error', () => { /* a dropped idle connection is replaced on next use */ });
+    type C = { query: (t: string, p?: unknown[]) => Promise<{ rows: unknown[] }> };
+    const run = (c: C) => (async <T>(text: string, params: unknown[] = []) =>
+      (await c.query(text, params.length ? params : undefined)).rows as T[]) as Query;
     return {
-      q: run(sql),
-      tx: (fn) => sql.begin(async (t) => {
-        await t.unsafe(`set local idle_in_transaction_session_timeout = '15s'; set local lock_timeout = '20s'; set local statement_timeout = '60s'`).simple();
-        return fn(run(t as unknown as typeof sql), async (text) => { await t.unsafe(text).simple(); });
-      }) as never,
+      q: run(pool),
+      tx: async (fn) => {
+        const c = await pool.connect();
+        try {
+          await c.query('begin');
+          // if this server is paused mid-transaction, Postgres aborts it and frees its locks
+          await c.query(`set local idle_in_transaction_session_timeout = '15s'; set local lock_timeout = '20s'; set local statement_timeout = '60s'`);
+          const r = await fn(run(c), async (text) => { await c.query(text); });
+          await c.query('commit');
+          return r;
+        } catch (e) {
+          await c.query('rollback').catch(() => {});
+          throw e;
+        } finally { c.release(); }
+      },
     };
   }
   // the embedded database is for local development only; hosted servers have a read-only filesystem
@@ -65,10 +83,11 @@ export async function migrate(db: Db) {
 
 /** True when the database already has this exact schema (so a cold start can skip all DDL and its locks). */
 async function upToDate(db: Db) {
-  try {
-    const [r] = await db.q<{ value: string }>(`select value from settings where key = 'schema_version'`);
-    return r?.value === SCHEMA_VERSION;
-  } catch { return false; } // no settings table yet
+  // ask whether the table exists first: a failing query would cost the pool its connection
+  const [t] = await db.q<{ exists: boolean }>(`select to_regclass('public.settings') is not null as exists`);
+  if (!t?.exists) return false;
+  const [r] = await db.q<{ value: string }>(`select value from settings where key = 'schema_version'`);
+  return r?.value === SCHEMA_VERSION;
 }
 
 export function getDb(): Promise<Db> {
