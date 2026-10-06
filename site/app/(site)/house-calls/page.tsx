@@ -6,6 +6,8 @@ import { getCatalog } from '@/lib/booking';
 import { rands } from '@/lib/time';
 import { pageMeta } from '@/lib/seo';
 
+// fees come from the database: render per request so admin changes show at once and builds never need the DB
+export const dynamic = 'force-dynamic';
 export const generateMetadata = () => pageMeta('/house-calls');
 
 export default async function HouseCalls() {

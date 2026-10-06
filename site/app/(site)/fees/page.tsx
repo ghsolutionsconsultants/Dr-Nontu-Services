@@ -6,6 +6,8 @@ import { photos } from '@/lib/content';
 import { rands } from '@/lib/time';
 import { pageMeta } from '@/lib/seo';
 
+// fees come from the database: render per request so admin changes show at once and builds never need the DB
+export const dynamic = 'force-dynamic';
 export const generateMetadata = () => pageMeta('/fees');
 const ICON: Record<string, string> = { in_person: 'clinic', house_call: 'house', virtual: 'screen' };
 
