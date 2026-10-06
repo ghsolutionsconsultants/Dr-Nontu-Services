@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { seed } from './seed';
@@ -22,7 +23,9 @@ async function connect(): Promise<Db> {
   if (url) {
     const postgres = (await import('postgres')).default;
     const cfg = parseDbUrl(url);
-    const sql = postgres({ ...cfg, max: 5, prepare: false, ssl: /^(localhost|127\.0\.0\.1)$/.test(cfg.host) ? false : 'require' });
+    // serverless-friendly: fail fast instead of hanging, and let idle connections go
+    const sql = postgres({ ...cfg, max: 5, prepare: false, connect_timeout: 10, idle_timeout: 20, max_lifetime: 60 * 30,
+      ssl: /^(localhost|127\.0\.0\.1)$/.test(cfg.host) ? false : 'require' });
     const run = (s: typeof sql) => (<T>(text: string, params: unknown[] = []) =>
       s.unsafe(text, params as never[]) as unknown as Promise<T[]>) as Query;
     return {
@@ -46,19 +49,30 @@ async function connect(): Promise<Db> {
  * Schema + seed in one transaction behind an advisory lock. Builds prerender with several workers at once;
  * the lock makes the first one set up the database while the others wait, then find it done.
  */
+export const SCHEMA_VERSION = createHash('sha256').update(schemaSql).digest('hex').slice(0, 12);
+
 export async function migrate(db: Db) {
   await db.tx(async (q, exec) => {
     await q(`select pg_advisory_xact_lock(724501)`);
     await exec(schemaSql);
     await seed(q);
+    await q(`insert into settings (key, value) values ('schema_version', $1) on conflict (key) do update set value = excluded.value`, [JSON.stringify(SCHEMA_VERSION)]);
   });
+}
+
+/** True when the database already has this exact schema (so a cold start can skip all DDL and its locks). */
+async function upToDate(db: Db) {
+  try {
+    const [r] = await db.q<{ value: string }>(`select value from settings where key = 'schema_version'`);
+    return r?.value === SCHEMA_VERSION;
+  } catch { return false; } // no settings table yet
 }
 
 export function getDb(): Promise<Db> {
   if (!g.__dnDb) {
     g.__dnDb = (async () => {
       const db = await connect();
-      if (!process.env.DATABASE_URL || process.env.DB_AUTO_MIGRATE === '1') await migrate(db);
+      if ((!process.env.DATABASE_URL || process.env.DB_AUTO_MIGRATE === '1') && !(await upToDate(db))) await migrate(db);
       return db;
     })().catch((e) => { g.__dnDb = undefined; throw e; });
   }
