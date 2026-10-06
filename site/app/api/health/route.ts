@@ -39,6 +39,17 @@ export async function GET(req: Request) {
     body.catalog = cat.ok ? { ms: cat.ms, types: cat.v.types.length, services: cat.v.services.length } : cat;
     body.availability = avail.ok ? { ms: avail.ms, openDays: avail.v.length } : avail;
     body.ok = cat.ok && avail.ok;
+    // what the database is doing right now (our own SQL only; no patient data)
+    const diag = await timed(async () => {
+      const db = await getDb();
+      const [t] = await db.q<{ statement_timeout: string; idle_tx: string }>(`select current_setting('statement_timeout') statement_timeout, current_setting('idle_in_transaction_session_timeout') idle_tx`);
+      const sessions = await db.q<{ state: string; age_s: number; waiting: string | null; query: string }>(
+        `select state, extract(epoch from now() - coalesce(xact_start, query_start))::int age_s, wait_event_type waiting, left(regexp_replace(query, '\\s+', ' ', 'g'), 90) query
+           from pg_stat_activity where datname = current_database() and pid <> pg_backend_pid() and state <> 'idle' order by age_s desc limit 8`);
+      const [l] = await db.q<{ blocked: number }>(`select count(*)::int blocked from pg_locks where not granted`);
+      return { ...t, blockedLocks: l.blocked, activeSessions: sessions };
+    }, 8000);
+    body.db = diag.ok ? diag.v : diag;
   }
   return Response.json(body, { status: body.ok ? 200 : 503 });
 }

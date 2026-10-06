@@ -30,7 +30,10 @@ async function connect(): Promise<Db> {
       s.unsafe(text, params as never[]) as unknown as Promise<T[]>) as Query;
     return {
       q: run(sql),
-      tx: (fn) => sql.begin((t) => fn(run(t as unknown as typeof sql), async (text) => { await t.unsafe(text).simple(); })) as never,
+      tx: (fn) => sql.begin(async (t) => {
+        await t.unsafe(`set local idle_in_transaction_session_timeout = '15s'; set local lock_timeout = '20s'; set local statement_timeout = '60s'`).simple();
+        return fn(run(t as unknown as typeof sql), async (text) => { await t.unsafe(text).simple(); });
+      }) as never,
     };
   }
   // the embedded database is for local development only; hosted servers have a read-only filesystem
