@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { seed } from './seed';
 import { schemaSql } from './schema';
+import { parseDbUrl } from './url';
 
 // One tiny interface over two drivers:
 //   DATABASE_URL set → postgres-js (Supabase / any Postgres)
@@ -20,7 +21,8 @@ async function connect(): Promise<Db> {
   const url = process.env.DATABASE_URL;
   if (url) {
     const postgres = (await import('postgres')).default;
-    const sql = postgres(url, { max: 5, prepare: false, ssl: /localhost|127\.0\.0\.1/.test(url) ? false : 'require' });
+    const cfg = parseDbUrl(url);
+    const sql = postgres({ ...cfg, max: 5, prepare: false, ssl: /^(localhost|127\.0\.0\.1)$/.test(cfg.host) ? false : 'require' });
     const run = (s: typeof sql) => (<T>(text: string, params: unknown[] = []) =>
       s.unsafe(text, params as never[]) as unknown as Promise<T[]>) as Query;
     return {

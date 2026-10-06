@@ -1,6 +1,7 @@
 // npm run db:check: paste a connection string (hidden as you type) and see whether the database accepts it.
 // Nothing is saved or printed except the result.
 import postgres from 'postgres';
+import { parseDbUrl } from '../lib/db/url';
 
 function askHidden(prompt: string): Promise<string> {
   return new Promise((resolve) => {
@@ -22,9 +23,10 @@ function askHidden(prompt: string): Promise<string> {
 (async () => {
   const url = process.env.DATABASE_URL || (await askHidden('Paste the full DATABASE_URL (hidden), then press Enter: '));
   if (!/^postgres(ql)?:\/\//.test(url)) { console.log('✗ That does not look like a connection string (it should start with postgresql://).'); process.exit(1); }
-  if (/\[|\]|YOUR-PASSWORD/.test(url)) { console.log('✗ The string still contains [ ] or YOUR-PASSWORD. Put the real password in, without brackets.'); process.exit(1); }
-  if (/\s/.test(url)) { console.log('✗ The string contains a space. Remove it.'); process.exit(1); }
-  const sql = postgres(url, { max: 1, prepare: false, ssl: 'require', connect_timeout: 15 });
+  if (/YOUR-PASSWORD|:\[.*\]@/.test(url)) { console.log('✗ The string still contains [YOUR-PASSWORD] or brackets. Put the real password in, without brackets.'); process.exit(1); }
+  let cfg;
+  try { cfg = parseDbUrl(url); } catch (e) { console.log('✗ ' + (e as Error).message); process.exit(1); }
+  const sql = postgres({ ...cfg, max: 1, prepare: false, ssl: 'require', connect_timeout: 15 });
   try {
     await sql`select 1`;
     console.log('✓ Connected. This exact string works: paste the same into Vercel as DATABASE_URL, then redeploy.');
