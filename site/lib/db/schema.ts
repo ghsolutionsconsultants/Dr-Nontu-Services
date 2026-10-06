@@ -1,5 +1,6 @@
--- Dr Nontu Medical Practice — schema
--- Idempotent: safe to run on every boot (PGlite locally) and via `npm run db:migrate` (Supabase).
+// Database schema. Kept in code (not read from disk at runtime) so it ships inside the serverless bundle.
+export const schemaSql = `-- Dr Nontu Medical Practice — schema
+-- Idempotent: safe to run on every boot (PGlite locally) and via "npm run db:migrate" (Supabase).
 
 create extension if not exists btree_gist;
 
@@ -174,3 +175,4 @@ create table if not exists outbox (
   error      text,
   created_at timestamptz not null default now()
 );
+`;

@@ -1,6 +1,7 @@
-import { mkdirSync, readFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { seed } from './seed';
+import { schemaSql } from './schema';
 
 // One tiny interface over two drivers:
 //   DATABASE_URL set → postgres-js (Supabase / any Postgres)
@@ -28,6 +29,8 @@ async function connect(): Promise<Db> {
       exec: async (text) => { await sql.unsafe(text).simple(); },
     };
   }
+  // the embedded database is for local development only; hosted servers have a read-only filesystem
+  if (process.env.VERCEL) throw new Error('DATABASE_URL is not set. Add your Supabase connection string in Vercel → Settings → Environment Variables.');
   const { PGlite } = await import('@electric-sql/pglite');
   const { btree_gist } = await import('@electric-sql/pglite/contrib/btree_gist');
   const dir = process.env.PGLITE_DIR ? path.resolve(process.env.PGLITE_DIR) : path.join(process.cwd(), '.data', 'pglite');
@@ -39,7 +42,7 @@ async function connect(): Promise<Db> {
 }
 
 export async function migrate(db: Db) {
-  await db.exec(readFileSync(path.join(process.cwd(), 'lib', 'db', 'schema.sql'), 'utf8'));
+  await db.exec(schemaSql);
   await seed(db);
 }
 
