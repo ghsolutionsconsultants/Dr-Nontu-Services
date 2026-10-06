@@ -122,13 +122,46 @@ button{font:inherit}
 .link-u::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .5s var(--ease-out)}
 .link-u:hover::after,.link-u[aria-current="page"]::after{transform:scaleX(1);transform-origin:left}
 
-/* ───────────── Intro curtain ───────────── */
-.intro{position:fixed;inset:0;z-index:90;background:var(--ink);display:grid;place-items:center;transition:clip-path 1s var(--ease-io)}
+/* ───────────── Entrance: about 5s, once per visit ─────────────
+   The logo draws itself, the name rises, a heartbeat traces the loading line, then the curtain lifts. */
+html.intro-running{overflow:hidden}
+.intro-seen .intro{display:none}
+.intro{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:1fr 72px auto;color:var(--linen);
+  background:radial-gradient(120% 90% at 50% 42%,#3B3A14 0%,var(--ink) 55%,#22220A 100%);
+  clip-path:inset(0 0 0 0);transition:clip-path .9s var(--ease-io)}
+.intro::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.09;mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .intro.done{clip-path:inset(0 0 100% 0)}
-.intro svg{width:min(120px,28vw);overflow:visible}
-.intro .tube,.intro .beat{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s var(--ease-out) forwards}
-.intro .beat{animation-delay:.35s}
-.intro .chest{transform-origin:center;transform-box:fill-box;transform:scale(0);animation:pop .5s .7s var(--ease-out) forwards}
+.intro-inner{display:grid;justify-items:center;align-content:center;gap:14px;padding:24px var(--gutter);text-align:center;transition:transform .8s var(--ease-io),opacity .6s}
+.intro.done .intro-inner{transform:translateY(-8vh);opacity:0}
+.intro-mark{width:clamp(96px,13vw,148px);overflow:visible;margin-bottom:10px}
+.intro-mark path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.intro-mark .t1{stroke:#E9E2CC;stroke-width:4.5;animation:draw 1.4s .2s var(--ease-out) forwards}
+.intro-mark .t2{stroke:var(--brass);stroke-width:4.5;animation:draw 1.1s .55s var(--ease-out) forwards}
+.intro-mark .ears{stroke:var(--brass);stroke-width:3.2;animation:draw .9s 1s var(--ease-out) forwards}
+.intro-mark .beat{stroke:var(--linen);stroke-width:2.6;animation:draw 1.1s 1.3s var(--ease-out) forwards}
+.intro-mark .tip{fill:#E9E2CC;transform-box:fill-box;transform-origin:center;transform:scale(0);animation:pop .4s 1.6s var(--ease-out) forwards}
+.intro-mark .chest{fill:var(--brass);transform-box:fill-box;transform-origin:center;transform:scale(0);animation:pop .6s 2.1s var(--ease-out) forwards,beatpulse 1.1s 2.8s ease-in-out infinite}
+.intro-mark .chest-ring{fill:none;stroke:var(--gold-light);stroke-width:1.4;transform-box:fill-box;transform-origin:center;transform:scale(0);animation:pop .5s 2.3s var(--ease-out) forwards}
+@keyframes beatpulse{0%,100%{transform:scale(1)}14%{transform:scale(1.2)}26%{transform:scale(1)}38%{transform:scale(1.1)}50%{transform:scale(1)}}
+.intro-word{display:flex;overflow:hidden;font-family:var(--display);font-weight:500;font-size:clamp(2.2rem,6vw,4.2rem);letter-spacing:.14em;line-height:1.05;font-variation-settings:"SOFT" 0;padding-bottom:.06em}
+.intro-word span{display:inline-block;transform:translateY(110%);animation:rise .9s var(--ease-out) forwards}
+@keyframes rise{to{transform:none}}
+.intro-sub{font:600 .76rem/1 var(--sans);letter-spacing:.9em;color:var(--gold-soft);opacity:0;animation:subin 1.1s 2.6s var(--ease-out) forwards;padding-left:.42em}
+@keyframes subin{to{opacity:1;letter-spacing:.42em}}
+.intro-tag{margin:10px 0 0;font-family:var(--display);font-size:var(--step-1);font-weight:300;color:color-mix(in srgb,var(--linen) 82%,var(--ink));opacity:0;animation:fadeup .9s 3.1s var(--ease-out) forwards;font-variation-settings:"SOFT" 100}
+.intro-tag em{color:var(--gold-soft);font-variation-settings:"SOFT" 100,"WONK" 1}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.intro-foot{position:relative}
+.intro-foot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.intro-foot path{fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.intro-foot .ghost{stroke:rgba(253,250,245,.1)}
+.intro-foot .trace{stroke:var(--brass);filter:drop-shadow(0 0 6px rgba(198,144,54,.55))}
+.intro-meta{display:flex;justify-content:space-between;align-items:center;padding:6px var(--gutter) 22px}
+.intro-count{font-family:var(--display);font-size:1.15rem;letter-spacing:.08em;color:var(--gold-light)}
+.intro-skip{all:unset;cursor:pointer;font:600 .7rem var(--sans);letter-spacing:.2em;text-transform:uppercase;color:color-mix(in srgb,var(--linen) 70%,var(--ink));border-bottom:1px solid currentColor;padding-bottom:3px;transition:color .3s}
+.intro-skip:hover{color:var(--linen)}
+.intro-skip:focus-visible{outline:2px solid var(--brass);outline-offset:6px}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes pop{to{transform:scale(1)}}
 
@@ -620,7 +653,7 @@ main{perspective:1600px}
   .hero h1 .in{transform:none}
   .statement-q .w{opacity:1}
   .branch .stem{stroke-dashoffset:0}.branch .leaf,.branch .olive{transform:none}
-  .intro,.cursor{display:none}
+  .cursor{display:none}
 }
 .book-3d{width:100%;aspect-ratio:2}
 .confirm-mark{display:block}

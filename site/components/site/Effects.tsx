@@ -13,6 +13,10 @@ export function Effects() {
   useEffect(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || lenis) return;
     lenis = new Lenis({ lerp: .09 });
+    if (document.documentElement.classList.contains('intro-running')) {
+      lenis.stop();
+      addEventListener('dn:intro-done', () => lenis?.start(), { once: true });
+    }
     let raf = 0;
     const loop = (t: number) => { lenis?.raf(t); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);

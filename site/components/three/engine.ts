@@ -85,7 +85,7 @@ export function mount(el: HTMLElement, kind: SceneKind, opts: { delay?: number }
   const rim = new THREE.DirectionalLight(0xE8C988, .8); rim.position.set(-4, -1, -3); scene.add(rim);
   const camera = new THREE.PerspectiveCamera(30, 1, .1, 100); camera.position.set(0, 0, 5);
   const st: Stage = { scene, camera, el, cleanup: [] };
-  const t0 = performance.now();
+  let t0 = performance.now();
   let visible = true, raf = 0, disposed = false;
   const render = () => { st.frame?.((performance.now() - t0) / 1000); renderer.render(scene, camera); };
   const resize = () => {
@@ -96,6 +96,7 @@ export function mount(el: HTMLElement, kind: SceneKind, opts: { delay?: number }
   const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { rootMargin: '120px' }); io.observe(el);
   const start = () => {
     if (disposed) return;
+    t0 = performance.now();
     el.classList.add('ready');
     if (still) { render(); return; }
     const loop = () => { raf = requestAnimationFrame(loop); if (visible) render(); };

@@ -18,7 +18,6 @@ export function Hero({ children }: { children: React.ReactNode }) {
   const [go, setGo] = useState(false);
   const [active, setActive] = useState(-1);
   const [reveal, setReveal] = useState(0);
-  const [intro, setIntro] = useState<'show' | 'done' | 'gone'>('gone');
   const hovering = useRef(false);
   const pathRef = useRef<SVGPathElement>(null), dotRef = useRef<HTMLSpanElement>(null), depthRef = useRef<HTMLDivElement>(null);
 
@@ -39,10 +38,10 @@ export function Hero({ children }: { children: React.ReactNode }) {
       }, 500 + 3 * 1100);
       T(() => { setActive(0); cycle = setInterval(() => { if (!hovering.current) setActive((a) => (a + 1) % 3); }, 4200); }, 500 + 3 * 1100 + 2600);
     };
-    let seen = false;
-    try { seen = !!sessionStorage.getItem('dn-intro'); sessionStorage.setItem('dn-intro', '1'); } catch {}
-    if (reduce || seen) T(start, 0);
-    else { T(() => setIntro('show'), 0); T(() => { setIntro('done'); T(start, 250); T(() => setIntro('gone'), 1100); }, 1250); }
+    // the hero's own entrance begins as the site intro's curtain lifts
+    const introRunning = document.documentElement.classList.contains('intro-running') && !(window as unknown as { __dnIntroDone?: boolean }).__dnIntroDone;
+    const onDone = () => T(start, 0);
+    if (introRunning) addEventListener('dn:intro-done', onDone, { once: true }); else T(start, 0);
 
     // depth parallax on the visual + headline
     if (!reduce && matchMedia('(hover:hover) and (pointer:fine)').matches) {
@@ -51,23 +50,13 @@ export function Hero({ children }: { children: React.ReactNode }) {
       addEventListener('pointermove', mv, { passive: true });
       const loop = () => { hx += (tx - hx) * .06; hy += (ty - hy) * .06; if (depthRef.current) depthRef.current.style.transform = `rotateY(${hx * 12}deg) rotateX(${-hy * 10}deg)`; raf2 = requestAnimationFrame(loop); };
       loop();
-      return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); cancelAnimationFrame(raf2); removeEventListener('pointermove', mv); };
+      return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); cancelAnimationFrame(raf2); removeEventListener('pointermove', mv); removeEventListener('dn:intro-done', onDone); };
     }
-    return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); };
+    return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); removeEventListener('dn:intro-done', onDone); };
   }, []);
 
   return (
     <section className={`hero${go ? ' go' : ''}`}>
-      {intro !== 'gone' && (
-        <div className={`intro${intro === 'done' ? ' done' : ''}`} aria-hidden>
-          <svg viewBox="0 0 120 120">
-            <path className="tube" pathLength={1} d="M38 21.9 A44 44 0 1 0 82 98.1" stroke="#E8C988" strokeWidth="3" />
-            <path className="tube" pathLength={1} d="M60 16 A44 44 0 0 1 98.1 82" stroke="#C69036" strokeWidth="3" />
-            <path className="beat" pathLength={1} d="M28 64 H44 L49 52 L54 74 L59 36 L64 82 L68 56 L71 62 H104" stroke="#FDFAF5" strokeWidth="2" />
-            <circle className="chest" cx="91" cy="91" r="9" fill="#C69036" />
-          </svg>
-        </div>
-      )}
       <div className="wrap">
         <div className="hero-grid">
           <div className="hero-copy">
@@ -87,7 +76,7 @@ export function Hero({ children }: { children: React.ReactNode }) {
                   <img key={a.id} className={active === i || (active < 0 && i === 0) ? 'on' : ''} src={img(a.id, 900)} alt={a.alt} fetchPriority={i === 0 ? 'high' : 'low'} />
                 ))}
               </div>
-              <Scene3D kind="mark" className="hero-3d" delay={intro === 'gone' ? 300 : 1500} />
+              <Scene3D kind="mark" className="hero-3d" delay={500} />
               <svg className="badge" viewBox="0 0 120 120" aria-hidden>
                 <g className="ring">
                   <path id="circ" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0" fill="none" />

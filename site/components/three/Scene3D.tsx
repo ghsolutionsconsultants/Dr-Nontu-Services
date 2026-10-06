@@ -8,7 +8,11 @@ export function Scene3D({ kind, className = '', delay }: { kind: SceneKind; clas
   useEffect(() => {
     let dispose: (() => void) | undefined, cancelled = false;
     const el = ref.current!;
-    const go = () => import('./engine').then((m) => { if (!cancelled) dispose = m.mount(el, kind, { delay }); });
+    const run = () => import('./engine').then((m) => { if (!cancelled) dispose = m.mount(el, kind, { delay }); });
+    const go = () => {
+      const waiting = document.documentElement.classList.contains('intro-running') && !(window as unknown as { __dnIntroDone?: boolean }).__dnIntroDone;
+      if (waiting) addEventListener('dn:intro-done', () => run(), { once: true }); else run();
+    };
     // start when within reach of the viewport
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); go(); } }, { rootMargin: '400px' });
     io.observe(el);
