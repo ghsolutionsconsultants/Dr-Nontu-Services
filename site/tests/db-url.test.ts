@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseDbUrl } from '../lib/db/url';
+import { describeDbUrl, parseDbUrl } from '../lib/db/url';
 
 const host = 'aws-0-eu-west-1.pooler.supabase.com';
 describe('parseDbUrl', () => {
@@ -16,7 +16,20 @@ describe('parseDbUrl', () => {
   it('ignores surrounding quotes and spaces', () => {
     expect(parseDbUrl(`  "postgresql://postgres.abc:pw@${host}:6543/postgres"  `).host).toBe(host);
   });
+  it('undoes common copy-paste slips', () => {
+    const v = `postgresql://postgres.abc:pw@${host}:6543/postgres`;
+    for (const raw of [`DATABASE_URL=${v}`, `\u201C${v}\u201D`, `${v.slice(0, 20)}\n${v.slice(20)}`, `'${v}'`])
+      expect(parseDbUrl(raw).password).toBe('pw');
+  });
+  it('names the placeholder when it was left in', () => {
+    expect(() => parseDbUrl(`postgresql://postgres.abc:[YOUR-PASSWORD]@${host}:6543/postgres`)).toThrow(/placeholder/);
+  });
+  it('describes a value without revealing it', () => {
+    const d = describeDbUrl(`postgresql://postgres.abc:secret@${host}:6543/postgres`);
+    expect(d).toMatchObject({ startsWithPostgresql: true, containsAt: true, port: '6543', pooler: true });
+    expect(JSON.stringify(d)).not.toContain('secret');
+  });
   it('rejects things that are not connection strings', () => {
-    expect(() => parseDbUrl('sb_publishable_xyz')).toThrow(/should look like/);
+    expect(() => parseDbUrl('sb_publishable_xyz')).toThrow(/expected form/);
   });
 });

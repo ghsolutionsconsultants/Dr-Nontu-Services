@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/db';
+import { describeDbUrl } from '@/lib/db/url';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,8 @@ export async function GET() {
     return Response.json({
       ok: false, database: 'error', code: err.code ?? null, message,
       hasDatabaseUrl: !!process.env.DATABASE_URL, autoMigrate: process.env.DB_AUTO_MIGRATE === '1',
+      // the shape of the value only, never any of its characters
+      databaseUrlShape: process.env.DATABASE_URL ? describeDbUrl(process.env.DATABASE_URL) : null,
     }, { status: 503 });
   }
 }
