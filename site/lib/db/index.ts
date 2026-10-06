@@ -8,10 +8,10 @@ import { schemaSql } from './schema';
 //   otherwise        → PGlite, an embedded Postgres stored in ./.data (local development)
 export type Row = Record<string, unknown>;
 export type Query = <T = Row>(text: string, params?: unknown[]) => Promise<T[]>;
+export type Exec = (text: string) => Promise<void>;
 export interface Db {
   q: Query;
-  tx: <T>(fn: (q: Query) => Promise<T>) => Promise<T>;
-  exec: (text: string) => Promise<void>;
+  tx: <T>(fn: (q: Query, exec: Exec) => Promise<T>) => Promise<T>;
 }
 
 const g = globalThis as unknown as { __dnDb?: Promise<Db> };
@@ -25,8 +25,7 @@ async function connect(): Promise<Db> {
       s.unsafe(text, params as never[]) as unknown as Promise<T[]>) as Query;
     return {
       q: run(sql),
-      tx: (fn) => sql.begin((t) => fn(run(t as unknown as typeof sql))) as never,
-      exec: async (text) => { await sql.unsafe(text).simple(); },
+      tx: (fn) => sql.begin((t) => fn(run(t as unknown as typeof sql), async (text) => { await t.unsafe(text).simple(); })) as never,
     };
   }
   // the embedded database is for local development only; hosted servers have a read-only filesystem
@@ -38,12 +37,19 @@ async function connect(): Promise<Db> {
   const pg = await PGlite.create(dir, { extensions: { btree_gist } });
   const run = (c: { query: (t: string, p?: unknown[]) => Promise<{ rows: unknown[] }> }) =>
     (async <T>(text: string, params: unknown[] = []) => (await c.query(text, params)).rows as T[]) as Query;
-  return { q: run(pg), tx: (fn) => pg.transaction((t) => fn(run(t))), exec: async (text) => { await pg.exec(text); } };
+  return { q: run(pg), tx: (fn) => pg.transaction((t) => fn(run(t), async (text) => { await t.exec(text); })) };
 }
 
+/**
+ * Schema + seed in one transaction behind an advisory lock. Builds prerender with several workers at once;
+ * the lock makes the first one set up the database while the others wait, then find it done.
+ */
 export async function migrate(db: Db) {
-  await db.exec(schemaSql);
-  await seed(db);
+  await db.tx(async (q, exec) => {
+    await q(`select pg_advisory_xact_lock(724501)`);
+    await exec(schemaSql);
+    await seed(q);
+  });
 }
 
 export function getDb(): Promise<Db> {
@@ -63,6 +69,6 @@ export async function q<T = Row>(text: string, params?: unknown[]) {
 export async function one<T = Row>(text: string, params?: unknown[]) {
   return (await q<T>(text, params))[0] as T | undefined;
 }
-export async function tx<T>(fn: (q: Query) => Promise<T>) {
+export async function tx<T>(fn: (q: Query, exec: Exec) => Promise<T>) {
   return (await getDb()).tx(fn);
 }

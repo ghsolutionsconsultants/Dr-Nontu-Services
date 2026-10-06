@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { services, locations, practice } from '../content';
-import type { Db } from './index';
+import type { Query } from './index';
 
 const DAY = [0, 1, 2, 3, 4, 5, 6];
 const WEEKDAYS = [1, 2, 3, 4, 5];
@@ -17,11 +17,12 @@ export const seoDefaults: Record<string, [string, string]> = {
   '/book': ['Book an appointment | Dr Nontu Medical Practice', 'Choose in person, house call or virtual, pick a length and a time, and pay online or at your visit.'],
 };
 
-export async function seed(db: Db) {
-  const done = await db.q(`select 1 from settings where key = 'seeded'`);
-  if (done.length) { await ensureAdmin(db); return; }
+/** Runs inside migrate()'s locked transaction. */
+export async function seed(q: Query) {
+  const done = await q(`select 1 from settings where key = 'seeded'`);
+  if (done.length) { await ensureAdmin(q); return; }
 
-  await db.tx(async (q) => {
+  {
     const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2) on conflict (key) do nothing`, [k, JSON.stringify(v)]);
     await set('practice', { phone: practice.phones[0], phone2: practice.phones[1], email: practice.email, whatsapp: practice.whatsapp });
     await set('notify_emails', [practice.email]);
@@ -60,15 +61,15 @@ export async function seed(db: Db) {
       await q(`insert into seo_pages (path, title, description) values ($1,$2,$3) on conflict do nothing`, [p, t, d]);
 
     await set('seeded', new Date().toISOString());
-  });
-  await ensureAdmin(db);
+  }
+  await ensureAdmin(q);
 }
 
 // Creates the first admin from ADMIN_EMAIL / ADMIN_PASSWORD (see .env.local) when none exists.
-async function ensureAdmin(db: Db) {
+async function ensureAdmin(q: Query) {
   const email = process.env.ADMIN_EMAIL, pw = process.env.ADMIN_PASSWORD;
   if (!email || !pw) return;
-  const any = await db.q(`select 1 from admins limit 1`);
+  const any = await q(`select 1 from admins limit 1`);
   if (any.length) return;
-  await db.q(`insert into admins (email, name, password_hash) values ($1, $2, $3)`, [email.toLowerCase(), 'Dr Nontu', await bcrypt.hash(pw, 11)]);
+  await q(`insert into admins (email, name, password_hash) values ($1, $2, $3)`, [email.toLowerCase(), 'Dr Nontu', await bcrypt.hash(pw, 11)]);
 }
