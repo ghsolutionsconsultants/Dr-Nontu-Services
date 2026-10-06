@@ -506,16 +506,20 @@ html.intro-running{overflow:hidden}
 @media (min-width:600px){.page-hero h1 em{display:inline-block}} /* keep the italic phrase on one line */
 .page-hero .lede{margin-top:22px}
 .page-hero-grid{display:grid;gap:var(--gap);align-items:end}
-.page-hero-visual{position:relative;width:100%;margin-top:8px}
-.page-hero-visual .ph{aspect-ratio:16/9;max-height:420px}
+/* below desktop: a contained 5:4 picture, so arched/round masks stay graceful (no giant domes) */
+.page-hero-visual{position:relative;width:min(100%,520px);margin-top:8px}
+.page-hero-visual .ph{aspect-ratio:5/4}
 .page-hero-3d{position:absolute;right:-10%;bottom:-14%;width:58%;aspect-ratio:1;z-index:3;pointer-events:none}
 @media (min-width:861px){
   .page-hero-grid{grid-template-columns:var(--cols);column-gap:var(--gap)}
   .page-hero-grid>:first-child{grid-column:1 / span 8}
   .page-hero-visual{grid-column:9 / -1;width:100%;margin-top:0}
-  .page-hero-visual .ph{aspect-ratio:4/5;max-height:none}
+  .page-hero-visual .ph{aspect-ratio:4/5}
 }
 .page-hero-3d{width:clamp(110px,30%,220px)}
+@media (max-width:860px){.page-hero-3d{right:-3%;bottom:-10%}}
+/* portrait photos in grid columns: contained below desktop */
+@media (max-width:860px){.g12>.c1-4>.ph{max-width:420px}}
 @media (min-width:861px){.page-hero-3d{width:58%}}
 .crumbs{display:flex;gap:8px;font-size:.82rem;color:color-mix(in srgb,var(--ink) 60%,var(--linen));margin-bottom:6px}
 .crumbs a{text-decoration:none}
