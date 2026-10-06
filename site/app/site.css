@@ -395,6 +395,8 @@ html.intro-running{overflow:hidden}
 .stepper li.done{color:var(--ink)}
 .stepper li.done button{all:unset;cursor:pointer;display:flex;gap:10px;align-items:center}
 .stepper li.cur{color:var(--ink);font-weight:600}
+/* phones: just the current step ("Step n of 6" sits under each step) */
+@media (max-width:639px){.stepper li:not(.cur){display:none}.stepper li.cur{flex:1}}
 .stepper li.cur::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--brass);transform-origin:left;animation:grow 1s var(--ease-out)}
 @keyframes grow{from{transform:scaleX(0)}}
 .book-body{display:grid;grid-template-columns:1fr}
