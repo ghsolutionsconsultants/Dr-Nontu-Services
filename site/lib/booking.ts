@@ -27,8 +27,11 @@ export class BookingError extends Error {
 }
 
 export async function getSetting<T>(key: string, fallback: T): Promise<T> {
-  const r = await one<{ value: T }>(`select value from settings where key = $1`, [key]);
-  return (r?.value ?? fallback) as T;
+  const r = await one<{ value: unknown }>(`select value from settings where key = $1`, [key]);
+  let v = r?.value;
+  // tolerate JSON that was stored as a string of JSON
+  if (typeof v === 'string' && /^\s*[[{]|^(true|false)$/.test(v)) { try { v = JSON.parse(v); } catch { /* keep */ } }
+  return (v ?? fallback) as T;
 }
 export const bookingSettings = () => getSetting<BookingSettings>('booking', { cancelCutoffHours: 24, leadMinutes: 120, holdMinutes: 15, slotStepMinutes: 15, maxDaysAhead: 60 });
 

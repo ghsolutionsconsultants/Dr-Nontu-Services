@@ -145,7 +145,7 @@ export async function saveSeo(path: string, f: FormData) {
 /* ── settings ── */
 export async function saveSettings(f: FormData) {
   await requireAdmin();
-  const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1,$2) on conflict (key) do update set value = excluded.value`, [k, JSON.stringify(v)]);
+  const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2::text::jsonb) on conflict (key) do update set value = excluded.value`, [k, JSON.stringify(v)]);
   await set('notify_emails', s(f, 'notify').split(/[\s,;]+/).filter(Boolean));
   await set('booking', {
     cancelCutoffHours: num(f, 'cutoff') || 24, leadMinutes: num(f, 'lead') || 0, holdMinutes: num(f, 'hold') || 15,

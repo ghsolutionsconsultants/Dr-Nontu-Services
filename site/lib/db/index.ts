@@ -56,7 +56,7 @@ export async function migrate(db: Db) {
     await q(`select pg_advisory_xact_lock(724501)`);
     await exec(schemaSql);
     await seed(q);
-    await q(`insert into settings (key, value) values ('schema_version', $1) on conflict (key) do update set value = excluded.value`, [JSON.stringify(SCHEMA_VERSION)]);
+    await q(`insert into settings (key, value) values ('schema_version', $1::text::jsonb) on conflict (key) do update set value = excluded.value`, [JSON.stringify(SCHEMA_VERSION)]);
   });
 }
 
@@ -72,7 +72,8 @@ export function getDb(): Promise<Db> {
   if (!g.__dnDb) {
     g.__dnDb = (async () => {
       const db = await connect();
-      if ((!process.env.DATABASE_URL || process.env.DB_AUTO_MIGRATE === '1') && !(await upToDate(db))) await migrate(db);
+      // schema changes apply themselves: a cheap version check, then a locked migration only when needed
+      if (!(await upToDate(db))) await migrate(db);
       return db;
     })().catch((e) => { g.__dnDb = undefined; throw e; });
   }

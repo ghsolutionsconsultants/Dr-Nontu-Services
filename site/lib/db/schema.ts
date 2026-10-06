@@ -9,6 +9,10 @@ create table if not exists settings (
   value jsonb not null
 );
 
+-- Repair: some drivers stored settings as a JSON string containing JSON; unwrap those (safe to re-run).
+update settings set value = (value #>> '{}')::jsonb
+ where jsonb_typeof(value) = 'string' and (left(value #>> '{}', 1) in ('{', '[') or (value #>> '{}') in ('true', 'false'));
+
 create table if not exists admins (
   id            serial primary key,
   email         text unique not null,

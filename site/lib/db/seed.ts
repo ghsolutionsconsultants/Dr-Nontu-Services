@@ -23,7 +23,7 @@ export async function seed(q: Query) {
   if (done.length) { await ensureAdmin(q); return; }
 
   {
-    const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2) on conflict (key) do nothing`, [k, JSON.stringify(v)]);
+    const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2::text::jsonb) on conflict (key) do nothing`, [k, JSON.stringify(v)]);
     await set('practice', { phone: practice.phones[0], phone2: practice.phones[1], email: practice.email, whatsapp: practice.whatsapp });
     await set('notify_emails', [practice.email]);
     await set('booking', { cancelCutoffHours: 24, leadMinutes: 120, holdMinutes: 15, slotStepMinutes: 15, maxDaysAhead: 60 });

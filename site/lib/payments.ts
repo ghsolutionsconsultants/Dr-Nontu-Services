@@ -51,7 +51,7 @@ export async function settlePayment(reference: string, amountCents: number, chan
   if (!p) return { ok: false as const, reason: 'unknown reference' };
   if (amountCents !== p.amount_cents) return { ok: false as const, reason: 'amount mismatch' };
   if (p.status === 'success') return { ok: true as const, bookingId: p.booking_id, already: true };
-  await q(`update payments set status = 'success', channel = $2, paid_at = now(), raw = $3 where id = $1`, [p.id, channel, JSON.stringify(raw ?? {})]);
+  await q(`update payments set status = 'success', channel = $2, paid_at = now(), raw = $3::text::jsonb where id = $1`, [p.id, channel, JSON.stringify(raw ?? {})]);
   // An expired hold whose time is still free comes back to life; if someone took the slot meanwhile,
   // the exclusion constraint refuses and the booking is flagged for refund.
   try {
