@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# local tooling
+.claude/
+
+# dependencies & builds (also covered in site/.gitignore)
+node_modules/
+.next/
+
+# secrets & local data: never commit
+.env
+.env.*
+!.env.example
+site/.data/

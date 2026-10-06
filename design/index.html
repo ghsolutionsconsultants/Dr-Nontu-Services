@@ -1,0 +1,1593 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dr Nontu Medical Practice</title>
+<meta name="description" content="Warm, personal general practice care in Esther Park and Fourways — in person, at home, or online.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ───────────────────────── Tokens ───────────────────────── */
+:root{
+  --linen:#FDFAF5;
+  --linen-2:#F5EEE1;
+  --mist:#EAE1CB;
+  --ink:#31310F;
+  --ink-2:#47461C;
+  --moss:#6A6528;
+  --brass:#C69036;
+  --brass-deep:#8C6119;
+  --earth:#7A5A22;
+  --rule:rgba(49,49,15,.14);
+  --rule-strong:rgba(49,49,15,.28);
+
+  --display:"Fraunces", Georgia, serif;
+  --sans:"Hanken Grotesk", system-ui, sans-serif;
+
+  --step--1:clamp(.8rem,.78rem + .1vw,.86rem);
+  --step-0:clamp(1rem,.96rem + .2vw,1.1rem);
+  --step-1:clamp(1.25rem,1.15rem + .45vw,1.5rem);
+  --step-2:clamp(1.6rem,1.4rem + .9vw,2.2rem);
+  --step-3:clamp(2.1rem,1.7rem + 1.9vw,3.4rem);
+  --step-4:clamp(2.7rem,1.9rem + 4vw,5.6rem);
+
+  --gutter:clamp(16px,4vw,56px);
+  --gap:clamp(16px,2.4vw,32px);
+  --cols:repeat(12,minmax(0,1fr));
+  --section-y:clamp(72px,8vw,120px);
+  --head-gap:clamp(28px,3.5vw,52px);
+  --max:1360px;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-io:cubic-bezier(.65,0,.35,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{
+  margin:0;background:var(--linen);color:var(--ink);
+  font-family:var(--sans);font-size:var(--step-0);line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+/* paper grain */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.07;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .18 0 0 0 0 .1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+img{display:block;max-width:100%}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:2px}
+.wrap{width:100%;max-width:var(--max);margin-inline:auto;padding-inline:var(--gutter)}
+.display{font-family:var(--display);font-variation-settings:"SOFT" 100,"WONK" 0;font-weight:340;letter-spacing:-.02em;line-height:1.02;text-wrap:balance}
+.display em{font-style:italic;font-weight:300;color:var(--moss);font-variation-settings:"SOFT" 100,"WONK" 1}
+.eyebrow{font-size:var(--step--1);letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--earth);display:inline-flex;align-items:center;gap:.7em}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor}
+.lede{font-size:var(--step-1);line-height:1.5;color:var(--ink-2);max-width:34ch;text-wrap:pretty}
+.muted{color:color-mix(in srgb,var(--ink) 68%,var(--linen))}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ───────────── Photos: one consistent grade ───────────── */
+.ph{position:relative;overflow:hidden;background:var(--mist)}
+.ph img{width:100%;height:100%;object-fit:cover;filter:saturate(.8) sepia(.14) contrast(1.03)}
+.ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(106,101,40,.06),rgba(122,90,34,.14));mix-blend-mode:multiply;pointer-events:none}
+.arch{border-radius:999px 999px 6px 6px}
+.round{border-radius:50%}
+
+/* ───────────── Buttons ───────────── */
+.btn{
+  --bg:var(--ink);--fg:var(--linen);
+  position:relative;display:inline-flex;align-items:center;gap:.65em;
+  padding:1em 1.55em;border-radius:999px;border:1px solid var(--bg);
+  background:var(--bg);color:var(--fg);text-decoration:none;
+  font:600 var(--step--1)/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;overflow:hidden;isolation:isolate;
+  transition:color .5s var(--ease-out),border-color .5s var(--ease-out);
+  will-change:transform;
+}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--brass);border-radius:inherit;transform:translateY(101%);transition:transform .55s var(--ease-out)}
+.btn:hover::before{transform:translateY(0)}
+.btn:hover{border-color:var(--brass);color:var(--ink)}
+.btn--ghost{--bg:transparent;--fg:var(--ink);border-color:var(--rule-strong)}
+.btn--light{--bg:var(--linen);--fg:var(--ink)}
+.btn svg{width:16px;height:16px;flex:none}
+.link-u{position:relative;text-decoration:none;font-weight:500}
+.link-u::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .5s var(--ease-out)}
+.link-u:hover::after{transform:scaleX(1);transform-origin:left}
+
+/* ───────────── Intro curtain ───────────── */
+.intro{position:fixed;inset:0;z-index:90;background:var(--ink);display:grid;place-items:center;transition:clip-path 1s var(--ease-io)}
+.intro.done{clip-path:inset(0 0 100% 0)}
+.intro svg{width:min(120px,28vw);overflow:visible}
+.intro .tube,.intro .beat{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s var(--ease-out) forwards}
+.intro .beat{animation-delay:.35s}
+.intro .chest{transform-origin:center;transform-box:fill-box;transform:scale(0);animation:pop .5s .7s var(--ease-out) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{to{transform:scale(1)}}
+
+/* ───────────── Header ───────────── */
+.hdr{position:fixed;inset:0 0 auto;z-index:50;transition:background .5s,box-shadow .5s,padding .5s var(--ease-out);padding-block:22px}
+.hdr.compact{background:color-mix(in srgb,var(--linen) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--rule);padding-block:12px}
+.hdr .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand svg{width:42px;height:42px;flex:none}
+.brand b{display:block;font-family:var(--display);font-weight:500;letter-spacing:.12em;font-size:1.02rem;line-height:1;font-variation-settings:"SOFT" 0}
+.brand small{display:block;font-size:.62rem;letter-spacing:.32em;color:var(--brass-deep);margin-top:5px;font-weight:600}
+.nav{display:flex;gap:30px;font-size:.92rem}
+.nav a{text-decoration:none}
+.hdr .btn{padding:.85em 1.3em}
+@media (max-width:960px){.nav{display:none}}
+@media (max-width:560px){.hdr .btn{display:none}}
+
+/* ───────────── Hero ───────────── */
+.hero{position:relative;padding-top:clamp(120px,16vh,170px);padding-bottom:40px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,7.8fr) minmax(0,4.2fr);gap:clamp(24px,5vw,80px);align-items:end}
+.hero-copy{container-type:inline-size}
+/* sized to the column so the longest line (11.8em) always fits: three lines, three beats */
+.hero h1{font-size:clamp(2.2rem,8.3cqi,5.4rem);margin:22px 0 0}
+.hero h1 em{display:inline-block}
+@media (max-width:600px){.hero h1 em{display:block}}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.06em;cursor:default}
+.hero h1 .in{display:inline-block;transform:translateY(108%);transition:transform 1.2s var(--ease-out),color .6s}
+.hero.go h1 .in{transform:none}
+.hero h1 .ln:nth-child(2) .in{transition-delay:.12s,0s}
+.hero h1 .ln:nth-child(3) .in{transition-delay:.24s,0s}
+.hero h1 .ln .tick{display:inline-block;width:.42em;height:.3em;margin-right:.18em;vertical-align:.12em;opacity:0;transform:translateX(-.3em);transition:opacity .5s,transform .5s var(--ease-out);color:var(--brass)}
+.hero h1 .ln.on .tick{opacity:1;transform:none}
+.hero h1 .ln:not(.on) em{color:color-mix(in srgb,var(--moss) 55%,var(--linen))}
+
+.hero-visual{position:relative;justify-self:end;width:min(100%,460px)}
+.hero-arch{aspect-ratio:4/5.1}
+.hero-arch img{position:absolute;inset:0;opacity:0;transform:scale(1.08);transition:opacity 1.2s var(--ease-io),transform 6s linear}
+.hero-arch img.on{opacity:1;transform:scale(1)}
+.hero-coin{position:absolute;left:-18%;bottom:8%;width:38%;aspect-ratio:1;border:6px solid var(--linen);box-shadow:0 18px 40px -18px rgba(49,49,15,.45)}
+.badge{position:absolute;right:-2%;top:6%;width:118px;height:118px;color:var(--ink)}
+.badge .ring{animation:spin 22s linear infinite;transform-origin:center}
+.badge text{font:600 10.4px var(--sans);letter-spacing:.26em;text-transform:uppercase;fill:currentColor}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.ecg{position:relative;height:clamp(84px,11vw,150px);margin-top:clamp(18px,3vw,36px);margin-inline:calc(var(--gutter) * -1)}
+.ecg svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ecg path{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.ecg .trace{clip-path:inset(0 calc((1 - var(--reveal,0)) * 100%) 0 0);transition:clip-path 1.3s var(--ease-io)}
+.ecg .ghost path{stroke:var(--rule)}
+.pulse{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 6px rgba(198,144,54,.18),0 0 22px 4px rgba(198,144,54,.45);opacity:0;transition:opacity .6s;pointer-events:none}
+.pulse.live{opacity:1}
+
+.hero-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end;margin-top:22px}
+.hero-foot p{margin:0}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.creds{text-align:right;font-size:var(--step--1);line-height:1.55}
+.creds b{font-family:var(--display);font-weight:500;font-size:1.15rem;display:block;font-variation-settings:"SOFT" 100}
+.creds span{letter-spacing:.06em}
+@media (max-width:860px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-visual{justify-self:center;width:min(78%,360px);margin-top:20px;order:2}
+  .hero-foot{grid-template-columns:1fr}
+  .creds{text-align:left}
+}
+
+/* ───────────── Marquee ───────────── */
+.marquee{background:var(--moss);color:var(--linen);overflow:hidden;padding:18px 0;margin-top:clamp(28px,4vw,56px)}
+.marquee-track{display:flex;width:max-content;animation:marq 38s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee span{font-family:var(--display);font-size:var(--step-2);font-weight:300;white-space:nowrap;display:inline-flex;align-items:center;gap:28px;padding-right:28px;font-variation-settings:"SOFT" 100}
+.marquee span i{font-style:italic;color:#E8C988}
+.marquee svg{width:56px;height:22px;flex:none}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ───────────── Statement ───────────── */
+.statement{padding-block:clamp(90px,14vw,190px);position:relative}
+.statement-grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:clamp(24px,5vw,80px);align-items:start}
+.statement-q{font-size:var(--step-3);margin:18px 0 0}
+.statement-q .w{opacity:.16;transition:opacity .35s}
+.statement-q .w.lit{opacity:1}
+.statement-aside{position:sticky;top:120px}
+.branch{width:100%;max-width:340px;color:var(--moss);overflow:visible}
+.branch .stem{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--p,0))}
+.branch .leaf{fill:none;stroke:currentColor;stroke-width:1.4;transform-box:fill-box;transform-origin:0 50%;transform:scale(0);transition:transform .9s var(--ease-out)}
+.branch .leaf.on{transform:scale(1)}
+.branch .olive{fill:var(--moss);transform-box:fill-box;transform-origin:center;transform:scale(0);transition:transform .7s var(--ease-out)}
+.branch .olive.on{transform:scale(1)}
+.statement-ph{margin-top:28px;width:min(100%,300px);aspect-ratio:3/4}
+.statement-sign{margin-top:42px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.statement-sign p{margin:0;max-width:44ch}
+@media (max-width:860px){.statement-grid{grid-template-columns:1fr}.statement-aside{position:relative;top:0;display:flex;gap:20px;align-items:end}.statement-ph{width:46%;margin:0}.branch{width:50%}}
+
+/* ───────────── Ways to consult ───────────── */
+.ways{padding-block:clamp(40px,8vw,110px) clamp(80px,12vw,160px);border-top:1px solid var(--rule)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:clamp(40px,6vw,80px)}
+.sec-head h2{font-size:var(--step-3);margin:16px 0 0;max-width:15ch}
+.sec-head p{max-width:38ch;margin:0}
+.ways-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(16px,2.4vw,32px);row-gap:clamp(56px,7vw,110px)}
+.way{position:relative}
+.way .ph{margin-bottom:22px}
+.way .ph img{transform:translateY(var(--py,0)) scale(1.12);will-change:transform}
+.way-1{grid-column:1 / span 6}
+.way-1 .ph{aspect-ratio:4/5}
+.way-2{grid-column:8 / span 5;margin-top:clamp(60px,12vw,200px)}
+.way-2 .ph{aspect-ratio:1}
+.way-3{grid-column:3 / span 7}
+.way-3 .ph{aspect-ratio:16/10}
+.way-meta{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--rule-strong);padding-top:14px}
+.way h3{font-family:var(--display);font-weight:400;font-size:var(--step-2);margin:0;font-variation-settings:"SOFT" 100;letter-spacing:-.01em}
+.way .hrs{font-size:var(--step--1);letter-spacing:.08em;text-transform:uppercase;color:var(--earth);white-space:nowrap}
+.way p{margin:10px 0 14px;max-width:40ch}
+.way-tag{position:absolute;top:18px;left:18px;z-index:2;background:var(--linen);border-radius:999px;padding:8px 14px 8px 10px;display:inline-flex;gap:8px;align-items:center;font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.way-tag svg{width:22px;height:22px}
+@media (max-width:860px){.way-1,.way-2,.way-3{grid-column:1 / -1;margin-top:0}}
+
+/* ───────────── Day timeline ───────────── */
+.day{background:var(--ink);color:var(--linen);padding-block:clamp(80px,11vw,150px);position:relative;overflow:hidden}
+.day .eyebrow{color:#DDB46A}
+.day .display em{color:#DDB46A}
+.day .sec-head h2{color:var(--linen)}
+.day .sec-head p{color:color-mix(in srgb,var(--linen) 72%,var(--ink))}
+.now-pill{display:inline-flex;gap:10px;align-items:center;border:1px solid rgba(253,250,245,.22);border-radius:999px;padding:10px 16px;font-size:.92rem}
+.now-pill i{width:8px;height:8px;border-radius:50%;background:#E8C988;box-shadow:0 0 0 0 rgba(159,180,106,.7);animation:ping 1.8s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 10px rgba(159,180,106,0)}100%{box-shadow:0 0 0 0 rgba(159,180,106,0)}}
+.tl{position:relative}
+.tl-row{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:center;padding-block:22px;border-top:1px solid rgba(253,250,245,.12)}
+.tl-row:nth-child(4){border-bottom:1px solid rgba(253,250,245,.12)}
+.tl-row h4{margin:0;font-family:var(--display);font-weight:400;font-size:var(--step-1);font-variation-settings:"SOFT" 100}
+.tl-row small{display:block;font-size:.8rem;letter-spacing:.06em;color:color-mix(in srgb,var(--linen) 60%,var(--ink));margin-top:4px}
+.tl-line{position:relative;height:56px}
+.tl-line svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.tl-line path{fill:none;stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.tl-line .off{stroke:rgba(253,250,245,.18);stroke-dasharray:2 5}
+.tl-line .on{stroke:#E8C988;clip-path:inset(0 100% 0 0);transition:clip-path 2.2s var(--ease-io)}
+.tl.in .tl-line .on{clip-path:inset(0 0 0 0)}
+.tl-row:nth-child(3) .on{transition-delay:.25s}
+.tl-row:nth-child(4) .on{transition-delay:.5s}
+.tl-axis{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;margin-top:12px;font-size:.78rem;letter-spacing:.06em;color:color-mix(in srgb,var(--linen) 55%,var(--ink))}
+.tl-axis div{display:flex;justify-content:space-between}
+.tl-now{position:absolute;top:0;bottom:0;width:1px;background:var(--brass);pointer-events:none}
+.tl-now span{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--brass);color:var(--ink);font-size:.72rem;font-weight:600;letter-spacing:.08em;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.tl-cols{position:absolute;inset:0 0 30px 224px}
+@media (max-width:720px){
+  .tl-row,.tl-axis{grid-template-columns:1fr;gap:8px}
+  .tl-axis>span{display:none}
+  .tl-cols{display:none}
+}
+
+/* ───────────── Services index ───────────── */
+.services{padding-block:clamp(90px,12vw,170px)}
+.svc-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule-strong)}
+.svc{position:relative;border-bottom:1px solid var(--rule)}
+.svc a{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,5fr) auto;gap:24px;align-items:center;padding:26px 0;text-decoration:none;position:relative}
+.svc a::before{content:"";position:absolute;inset:0 calc(var(--gutter) * -1);background:var(--linen-2);clip-path:inset(0 0 100% 0);transition:clip-path .6s var(--ease-out);z-index:-1}
+.svc a:hover::before,.svc a:focus-visible::before{clip-path:inset(0)}
+.svc h3{margin:0;font-family:var(--display);font-weight:340;font-size:clamp(1.35rem,1.1rem + 1vw,2rem);letter-spacing:-.01em;font-variation-settings:"SOFT" 100;transition:transform .6s var(--ease-out)}
+.svc a:hover h3{transform:translateX(14px)}
+.svc p{margin:0;color:color-mix(in srgb,var(--ink) 72%,var(--linen))}
+.svc .modes{display:flex;gap:6px}
+.svc .modes svg{width:26px;height:26px;color:var(--earth);opacity:.85}
+.svc-thumb{display:none}
+.svc-float{position:fixed;left:0;top:0;width:260px;aspect-ratio:4/5;pointer-events:none;z-index:40;opacity:0;transform:translate(-50%,-50%) scale(.85);transition:opacity .35s,transform .5s var(--ease-out)}
+.svc-float.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.svc-float img{position:absolute;inset:0;opacity:0;transition:opacity .4s}
+.svc-float img.on{opacity:1}
+@media (max-width:860px){
+  .svc a{grid-template-columns:72px minmax(0,1fr);row-gap:6px}
+  .svc-thumb{display:block;grid-row:span 2;width:72px;aspect-ratio:1}
+  .svc .modes{display:none}
+  .svc-float{display:none}
+}
+
+/* ───────────── Booking demo ───────────── */
+.book{padding-block:clamp(90px,12vw,170px);background:var(--linen-2);position:relative}
+.book-card{background:var(--linen);border:1px solid var(--rule);border-radius:6px;box-shadow:0 40px 80px -50px rgba(49,49,15,.35);overflow:hidden}
+.stepper{display:flex;gap:0;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
+.stepper li{list-style:none;flex:1;min-width:130px;padding:18px 22px;font-size:.84rem;display:flex;gap:10px;align-items:center;color:color-mix(in srgb,var(--ink) 50%,var(--linen));position:relative;white-space:nowrap}
+.stepper li b{font-family:var(--display);font-weight:400;font-size:1.05rem}
+.stepper li.done{color:var(--ink)}
+.stepper li.cur{color:var(--ink);font-weight:600}
+.stepper li.cur::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--brass);transform-origin:left;animation:grow 1s var(--ease-out)}
+@keyframes grow{from{transform:scaleX(0)}}
+.stepper{margin:0;padding:0}
+.book-body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,.85fr)}
+.book-col{padding:clamp(20px,3vw,36px)}
+.book-col+.book-col{border-left:1px solid var(--rule)}
+.book-col h4{margin:0 0 18px;font-family:var(--display);font-weight:400;font-size:var(--step-1);font-variation-settings:"SOFT" 100}
+.types{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.type{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--rule-strong);background:transparent;border-radius:999px;padding:9px 14px 9px 10px;font:500 .86rem var(--sans);color:var(--ink);cursor:pointer;transition:background .3s,color .3s,border-color .3s}
+.type svg{width:20px;height:20px}
+.type[aria-pressed="true"]{background:var(--ink);color:var(--linen);border-color:var(--ink)}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal-head strong{font-family:var(--display);font-weight:500;font-size:1.1rem}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:34px;height:34px;border-radius:50%;border:1px solid var(--rule-strong);background:none;cursor:pointer;color:var(--ink);display:grid;place-items:center}
+.cal-nav button:disabled{opacity:.3;cursor:default}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .dow{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--earth);padding:6px 0}
+.cal button{aspect-ratio:1;border:0;background:none;border-radius:50%;font:500 .95rem var(--sans);color:var(--ink);cursor:pointer;position:relative;font-variant-numeric:tabular-nums;transition:background .25s,color .25s}
+.cal button:disabled{color:color-mix(in srgb,var(--ink) 25%,var(--linen));cursor:default}
+.cal button.avail::after{content:"";position:absolute;left:50%;bottom:14%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--brass)}
+.cal button.avail:hover{background:var(--linen-2)}
+.cal button.sel{background:var(--ink);color:var(--linen)}
+.cal button.sel::after{background:#E8C988}
+.cal button.ripple::before{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--brass);animation:rip .7s var(--ease-out) forwards}
+@keyframes rip{from{transform:scale(.6);opacity:1}to{transform:scale(1.6);opacity:0}}
+.slot-group{margin-bottom:18px}
+.slot-group h5{margin:0 0 10px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--earth);font-weight:600}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:1px solid var(--rule-strong);background:none;border-radius:4px;padding:10px 0;font:500 .92rem var(--sans);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;opacity:0;transform:translateY(8px);animation:slotin .5s var(--ease-out) forwards;transition:background .25s,color .25s,border-color .25s}
+.slot:hover{border-color:var(--ink)}
+.slot[aria-pressed="true"]{background:var(--moss);border-color:var(--moss);color:var(--linen)}
+.slot:disabled{text-decoration:line-through;opacity:.35!important;cursor:default}
+@keyframes slotin{to{opacity:1;transform:none}}
+.summary{background:var(--ink);color:var(--linen)}
+.summary h4{color:var(--linen)}
+.sum-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(253,250,245,.14);font-size:.92rem}
+.sum-row span:first-child{color:color-mix(in srgb,var(--linen) 60%,var(--ink))}
+.sum-row span:last-child{text-align:right}
+.pay{display:grid;gap:8px;margin:20px 0}
+.pay label{display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(253,250,245,.2);border-radius:4px;padding:12px;cursor:pointer;font-size:.88rem;line-height:1.4;transition:border-color .3s,background .3s}
+.pay label:has(input:checked){border-color:#E8C988;background:rgba(232,201,136,.07)}
+.pay input{accent-color:var(--brass);margin-top:3px}
+.pay small{display:block;color:color-mix(in srgb,var(--linen) 58%,var(--ink));margin-top:2px}
+.summary .btn{width:100%;justify-content:center}
+.empty{color:color-mix(in srgb,var(--ink) 55%,var(--linen));font-size:.92rem}
+@media (max-width:1000px){.book-body{grid-template-columns:1fr 1fr}.summary{grid-column:1 / -1}.book-col+.book-col.summary{border-left:0}}
+@media (max-width:680px){.book-body{grid-template-columns:1fr}.book-col+.book-col{border-left:0;border-top:1px solid var(--rule)}}
+
+/* ───────────── Locations ───────────── */
+.locs{padding-block:clamp(90px,12vw,170px)}
+.locs-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);gap:clamp(20px,4vw,56px);align-items:center}
+.loc h3{font-family:var(--display);font-weight:400;font-size:var(--step-2);margin:12px 0 10px;font-variation-settings:"SOFT" 100}
+.loc address{font-style:normal;line-height:1.7;margin-bottom:18px}
+.loc .eyebrow{color:var(--brass-deep)}
+.map{width:100%;aspect-ratio:1.15;color:var(--ink)}
+.map .road{fill:none;stroke:var(--rule-strong);stroke-width:1}
+.map .route{fill:none;stroke:var(--brass);stroke-width:1.6;stroke-dasharray:4 6;animation:dash 30s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-400}}
+.map .pin circle:first-child{fill:var(--ink)}
+.map .pin .halo{fill:none;stroke:var(--brass);transform-box:fill-box;transform-origin:center;animation:halo 2.4s var(--ease-out) infinite}
+@keyframes halo{from{transform:scale(.4);opacity:1}to{transform:scale(2.4);opacity:0}}
+.map text{font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;fill:var(--ink)}
+@media (max-width:860px){.locs-grid{grid-template-columns:1fr}.map{order:-1;max-width:420px}}
+
+/* ───────────── Style tile ───────────── */
+.tile{padding-block:clamp(90px,12vw,170px);background:var(--mist)}
+.tile-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(16px,2.4vw,32px)}
+.tile-card{background:var(--linen);border-radius:6px;padding:clamp(20px,3vw,36px)}
+.tile-card h4{margin:0 0 18px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--earth)}
+.swatches{grid-column:span 7;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.swatches h4{grid-column:1 / -1}
+.sw{border-radius:4px;aspect-ratio:1.25;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;font-size:.78rem;line-height:1.35}
+.sw b{font-family:var(--display);font-weight:500;font-size:1rem}
+.types-card{grid-column:span 5}
+.spec-1{font-family:var(--display);font-size:3.6rem;line-height:1;font-weight:340;letter-spacing:-.02em;font-variation-settings:"SOFT" 100;margin:0}
+.spec-1 em{color:var(--moss);font-weight:300;font-variation-settings:"SOFT" 100,"WONK" 1}
+.spec-meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--earth);border-top:1px solid var(--rule);padding-top:10px;margin-top:14px}
+.icons-card{grid-column:span 5}
+.icon-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.icon-row figure{margin:0;text-align:center;font-size:.74rem;color:var(--earth)}
+.icon-row svg{width:44px;height:44px;color:var(--ink);margin:0 auto 8px;display:block}
+.ui-card{grid-column:span 7;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.ui-card h4{width:100%}
+.field{display:grid;gap:6px;min-width:220px;flex:1}
+.field label{font-size:.78rem;font-weight:600;letter-spacing:.06em}
+.field input{font:inherit;border:0;border-bottom:1px solid var(--rule-strong);background:transparent;padding:10px 0;color:var(--ink);transition:border-color .3s}
+.field input:focus{outline:none;border-color:var(--brass)}
+@media (max-width:900px){.swatches,.types-card,.icons-card,.ui-card{grid-column:1 / -1}.swatches{grid-template-columns:repeat(2,1fr)}}
+
+/* ───────────── Footer ───────────── */
+.ftr{background:var(--ink);color:var(--linen);padding-top:clamp(80px,10vw,140px);overflow:hidden;position:relative}
+.ftr-cta{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:end}
+.ftr-cta h2{font-size:var(--step-4);margin:0;color:var(--linen)}
+.ftr-cta h2 em{color:#DDB46A}
+.ftr-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;margin-top:clamp(60px,8vw,110px);padding-top:32px;border-top:1px solid rgba(253,250,245,.14);font-size:.92rem}
+.ftr-cols h5{margin:0 0 12px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#DDB46A;font-weight:600}
+.ftr-cols a{display:block;text-decoration:none;color:color-mix(in srgb,var(--linen) 78%,var(--ink));padding:3px 0}
+.ftr-cols a:hover{color:var(--linen)}
+.ftr-ecg{height:90px;margin-top:40px;position:relative}
+.ftr-ecg path{stroke:rgba(253,250,245,.35)}
+.ftr-big{font-family:var(--display);font-weight:300;font-size:clamp(5rem,21vw,20rem);line-height:.78;letter-spacing:-.04em;margin:0;white-space:nowrap;color:transparent;-webkit-text-stroke:1px rgba(253,250,245,.22);font-variation-settings:"SOFT" 100;transform:translateY(12%)}
+.ftr-legal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.78rem;color:color-mix(in srgb,var(--linen) 55%,var(--ink));padding-block:20px;border-top:1px solid rgba(253,250,245,.1);position:relative;z-index:1;background:var(--ink)}
+@media (max-width:860px){.ftr-cta{grid-template-columns:1fr}.ftr-cols{grid-template-columns:repeat(2,1fr)}}
+
+
+/* ───────────── 3D stages ───────────── */
+.stage3d{position:relative}
+.stage3d canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity 1.2s var(--ease-out)}
+.stage3d.ready canvas{opacity:1}
+.hero-3d{position:absolute;left:-30%;bottom:-34%;width:64%;aspect-ratio:1;z-index:2;pointer-events:none}
+.hero-3d::after{content:"";position:absolute;left:22%;right:22%;bottom:4%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(49,49,15,.28),transparent);filter:blur(6px);z-index:-1}
+.hero-3d:not(.ready)::after{opacity:0}
+@media (max-width:860px){.hero-3d{left:-22%;width:64%}}
+
+.plans{padding-block:clamp(90px,12vw,170px);background:radial-gradient(120% 90% at 70% 40%,#FFFDF8 0%,var(--linen) 45%,var(--linen-2) 100%);overflow:hidden;position:relative}
+.plans-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,80px);align-items:center}
+.plans h2{font-size:var(--step-3);margin:16px 0 18px}
+.plans-3d{aspect-ratio:1.15;width:calc(100% + var(--gutter));margin-right:calc(var(--gutter) * -1)}
+.plan-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+.plan{border:1px solid var(--rule-strong);border-radius:6px;padding:20px;background:color-mix(in srgb,var(--linen) 70%,transparent);backdrop-filter:blur(4px)}
+.plan h3{margin:0 0 6px;font-family:var(--display);font-weight:400;font-size:var(--step-1);display:flex;align-items:center;gap:10px;font-variation-settings:"SOFT" 100}
+.plan h3 i{width:14px;height:14px;border-radius:50%;flex:none}
+.plan p{margin:0;font-size:.9rem}
+.plan .soon{display:inline-block;margin-top:12px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--brass-deep)}
+@media (max-width:860px){.plans-grid{grid-template-columns:1fr}.plans-3d{order:-1;width:100%;margin:0;aspect-ratio:1.2}}
+
+.ftr-3d{position:absolute;inset:0 0 auto;height:calc(var(--section-y) + 360px);pointer-events:none;z-index:0}
+.ftr>.wrap{position:relative;z-index:1}
+
+
+/* ───────────── Depth system: the whole page lives in 3D ───────────── */
+main,.ftr{perspective:1600px}
+/* sections swing in on a hinge */
+.rv{transform:perspective(1200px) translateY(40px) rotateX(14deg);transform-origin:50% 100%}
+.rv.in{transform:none}
+.svc.rv{transform:perspective(900px) rotateX(-70deg);transform-origin:50% 0;opacity:0}
+.svc.rv.in{transform:none;opacity:1}
+/* tilt surfaces with a moving light */
+[data-tilt]{transform-style:preserve-3d;transition:transform .9s var(--ease-out),opacity 1s var(--ease-out),clip-path 1.4s var(--ease-io);will-change:transform}
+[data-tilt].tilting{transition:transform .12s linear,opacity 1s,clip-path 1.4s}
+[data-tilt]>.glare{position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;background:radial-gradient(circle at var(--gx,50%) var(--gy,50%),rgba(255,248,230,.38),transparent 55%);opacity:0;transition:opacity .5s;mix-blend-mode:soft-light}
+[data-tilt].tilting>.glare{opacity:1}
+.ph[data-tilt]{box-shadow:0 30px 60px -30px rgba(49,49,15,.45),0 12px 24px -16px rgba(49,49,15,.3)}
+.way-tag{transform:translateZ(40px)}
+/* hero depth layers */
+.hero-visual{transform-style:preserve-3d;perspective:1000px}
+.hero-depth{transform-style:preserve-3d;transition:transform .2s linear}
+.hero-depth .badge{transform:translateZ(90px)}
+.hero-depth .hero-3d{transform:translateZ(140px)}
+.hero h1{transform-style:preserve-3d}
+/* booking card floats on its own plane */
+.book .wrap{perspective:1800px}
+.book-card{transform-style:preserve-3d;box-shadow:0 2px 0 var(--rule),0 60px 90px -50px rgba(49,49,15,.5),0 30px 40px -30px rgba(49,49,15,.25)}
+.book-card.rv{transform:perspective(1800px) rotateX(22deg) translateY(80px) scale(.96)}
+.book-card.rv.in{transform:none}
+.summary{transform:translateZ(0)}
+/* tactile buttons */
+.btn{box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 10px 20px -12px rgba(49,49,15,.55)}
+.btn:active{transform:translateY(1px) scale(.98)!important}
+.slot,.type,.cal button.avail{transition:transform .3s var(--ease-out),background .25s,color .25s,border-color .25s,box-shadow .3s}
+.slot:not(:disabled):hover,.type:hover{transform:translateY(-2px);box-shadow:0 8px 14px -10px rgba(49,49,15,.5)}
+/* timeline lies on a tilted plane that stands up as it enters */
+.tl{transform:perspective(1400px) rotateX(38deg);transform-origin:50% 100%;transition:transform 1.6s var(--ease-out)}
+.tl.in{transform:perspective(1400px) rotateX(0)}
+/* extruded wordmark */
+.ftr-big{-webkit-text-stroke:0;color:#3B3A14;text-shadow:1px 1px 0 #2E2D0E,2px 2px 0 #2C2B0D,3px 3px 0 #2A290C,4px 4px 0 #28270B,5px 5px 0 #26250A,6px 6px 0 #242309,7px 7px 0 #222108,8px 8px 0 #201F07,14px 22px 40px rgba(0,0,0,.45);transform:translateY(12%) perspective(900px) rotateX(24deg);transform-origin:50% 100%}
+.ftr-big span{display:inline-block;transition:transform .7s var(--ease-out),color .5s}
+.ftr-big span:hover{transform:translateY(-8%) translateZ(30px);color:#4F4D1C}
+@media (prefers-reduced-motion:reduce){.tl{transform:none}.book-card.rv,.svc.rv{transform:none;opacity:1}}
+
+
+
+/* statement: the branch grows out of the photograph instead of stacking above it */
+.statement-aside{position:relative;top:0}
+.statement-ph{margin-top:0;width:100%;aspect-ratio:3/4}
+.branch{position:absolute;right:-22%;top:-16%;width:74%;max-width:none;z-index:4;pointer-events:none}
+.statement-grid{align-items:center}
+@media (max-width:860px){.statement-aside{display:block;width:min(72%,340px);margin-bottom:56px}.statement-ph{width:100%}.branch{width:70%}}
+
+
+/* ───────────── More 3D: objects that belong to their content ───────────── */
+.way-3d{position:absolute;width:clamp(120px,14vw,200px);aspect-ratio:1;z-index:5;pointer-events:none}
+.way-1 .way-3d{right:-14%;top:56%}
+.way-2 .way-3d{left:-22%;top:44%}
+.way-3 .way-3d{left:-16%;top:22%}
+@media (max-width:860px){.way .way-3d{left:auto;right:-4%;top:-8%;width:120px}}
+.way-meta{flex-direction:column-reverse;align-items:flex-start;gap:6px}
+.ph.round .way-tag{left:50%;top:9%;transform:translateX(-50%) translateZ(40px)}
+.day-side{display:grid;gap:14px;justify-items:start}
+.day-3d{width:100%;aspect-ratio:1.7}
+.book .wrap{position:relative}
+.book-3d{width:100%;aspect-ratio:2;pointer-events:none}
+.map-3d{aspect-ratio:1}
+
+
+/* ways: one row, one proportion, three silhouettes */
+.way .ph{aspect-ratio:4/5!important}
+.pill{border-radius:999px}
+.way .way-tag{left:50%;top:7%;transform:translateX(-50%) translateZ(40px)}
+.way .way-3d{left:auto!important;right:-9%;top:-7%!important;width:clamp(110px,12vw,170px)}
+@media (max-width:860px){.way .ph{aspect-ratio:4/3!important}.ways-grid{row-gap:56px}}
+
+
+/* head objects float in the section's top padding and break the section edge; they add no height */
+.day{overflow:visible}
+.day-side{position:relative}
+@media (min-width:861px){
+  .day-side>.stage3d{position:absolute;left:0;right:0;bottom:calc(100% + 4px);width:100%;aspect-ratio:2.1;z-index:6}
+}
+
+/* ───────────── One grid, one rhythm ─────────────
+   12 columns, one gutter. Content breaks only on lines 1 · 5 · 9 · 13
+   (hero copy/visual is the single 8|4 split). Every section shares --section-y. */
+.statement,.ways,.plans,.day,.services,.book,.locs,.tile{padding-block:var(--section-y)}
+.ftr{padding-top:var(--section-y)}
+.sec-head{margin-bottom:var(--head-gap)}
+.plans-3d{width:100%;margin-right:0}
+.ftr-cta .ctas{justify-content:flex-start}
+@media (min-width:861px){
+  .hero-grid,.statement-grid,.ways-grid,.plans-grid,.locs-grid,.tile-grid,.ftr-cta,.ftr-cols,.sec-head{display:grid;grid-template-columns:var(--cols);column-gap:var(--gap)}
+  .sec-head{align-items:end}
+  .sec-head>:first-child{grid-column:1 / span 8}
+  .sec-head>:nth-child(2){grid-column:9 / -1;justify-self:start;max-width:none}
+  .sec-head h2{max-width:none}
+  .hero-copy{grid-column:1 / span 8}
+  .hero-visual{grid-column:9 / -1;width:100%;justify-self:stretch}
+  .statement-grid>:first-child{grid-column:1 / span 4}
+  .statement-grid>:last-child{grid-column:5 / -1}
+  .way-1{grid-column:1 / span 4}
+  .way-2{grid-column:5 / span 4;margin-top:0}
+  .way-3{grid-column:9 / -1}
+  .plans-grid>:first-child{grid-column:1 / span 5}
+  .plans-grid>:last-child{grid-column:7 / -1}
+  .locs-grid>:nth-child(1){grid-column:1 / span 4}
+  .locs-grid>:nth-child(2){grid-column:5 / span 4}
+  .locs-grid>:nth-child(3){grid-column:9 / -1}
+  .swatches{grid-column:1 / span 8}
+  .types-card{grid-column:9 / -1}
+  .icons-card{grid-column:1 / span 4}
+  .ui-card{grid-column:5 / -1}
+  .tile-grid{row-gap:var(--gap)}
+  .ftr-cta>:first-child{grid-column:1 / span 8}
+  .ftr-cta>:last-child{grid-column:9 / -1}
+  .ftr-cols>:nth-child(1){grid-column:1 / span 4}
+  .ftr-cols>:nth-child(2){grid-column:5 / span 4}
+  .ftr-cols>:nth-child(3){grid-column:9 / span 2}
+  .ftr-cols>:nth-child(4){grid-column:11 / -1}
+  .svc a{grid-template-columns:var(--cols);column-gap:var(--gap)}
+  .svc h3{grid-column:1 / span 6;white-space:nowrap}
+  .svc p{grid-column:7 / span 4}
+  .svc .modes{grid-column:11 / -1;justify-self:end}
+}
+@media (min-width:721px){
+  .tl-row,.tl-axis{grid-template-columns:var(--cols);column-gap:var(--gap)}
+  .tl-row>:first-child,.tl-axis>span{grid-column:1 / span 4}
+  .tl-line,.tl-axis>div{grid-column:5 / -1}
+  .tl-cols{inset:0 0 30px 0;display:grid;grid-template-columns:var(--cols);column-gap:var(--gap)}
+  .tl-track{grid-column:5 / -1;position:relative}
+}
+
+/* mobile action bar */
+.mbar{display:none}
+@media (max-width:720px){
+  .mbar{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:8px;background:color-mix(in srgb,var(--ink) 94%,transparent);backdrop-filter:blur(8px);border-radius:999px;transform:translateY(140%);transition:transform .6s var(--ease-out)}
+  .mbar.show{transform:none}
+  .mbar .btn{justify-content:center;padding:.95em .6em;min-width:0;letter-spacing:.04em}
+  .mbar .btn--ghost{--fg:var(--linen);border-color:rgba(253,250,245,.25)}
+}
+
+/* custom cursor */
+.cursor{position:fixed;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--brass);pointer-events:none;z-index:95;transition:width .35s var(--ease-out),height .35s var(--ease-out),margin .35s var(--ease-out),background .35s,opacity .3s;mix-blend-mode:multiply;opacity:0}
+.cursor.big{width:54px;height:54px;margin:-27px 0 0 -27px;background:rgba(198,144,54,.25)}
+@media (hover:none),(pointer:coarse){.cursor{display:none}}
+
+/* generic reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease-out),transform 1.2s var(--ease-out)}
+.rv.in{opacity:1;transform:none}
+.mask-in{clip-path:inset(100% 0 0 0);transition:clip-path 1.4s var(--ease-io)}
+.mask-in.in{clip-path:inset(0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .rv,.mask-in{opacity:1;transform:none;clip-path:none}
+  .hero h1 .in{transform:none}
+  .statement-q .w{opacity:1}
+  .branch .stem{stroke-dashoffset:0}.branch .leaf,.branch .olive{transform:none}
+  .intro{display:none}
+  .cursor{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Symbols: logo mark + custom line icons (1.5px stroke family) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mark" viewBox="0 0 120 120">
+      <path d="M38 21.9 A44 44 0 1 0 82 98.1" fill="none" stroke="#34330F" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M60 16 A44 44 0 0 1 98.1 82" fill="none" stroke="#C69036" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M14 34 C14 52 18 62 28 64 M42 34 C42 52 38 62 28 64" fill="none" stroke="#C69036" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="14" cy="32" r="3.4" fill="#34330F"/><circle cx="42" cy="32" r="3.4" fill="#34330F"/>
+      <path d="M28 64 H44 L49 52 L54 74 L59 36 L64 82 L68 56 L71 62 H104" fill="none" stroke="#34330F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="91" cy="91" r="10" fill="#C69036"/><circle cx="91" cy="91" r="5.5" fill="none" stroke="#E8C988" stroke-width="1.4"/>
+    </symbol>
+    <symbol id="i-clinic" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 27V9l11-5 11 5v18"/><path d="M12 27v-6a4 4 0 0 1 8 0v6"/><path d="M3 27h26"/><path d="M16 9v6M13 12h6"/></g></symbol>
+    <symbol id="i-house" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15 16 5l12 10"/><path d="M7 13v14h18V13"/><path d="M13 27v-7h6v7"/><path d="M22 7v4"/></g></symbol>
+    <symbol id="i-screen" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="16" rx="2"/><path d="M12 27h8M16 22v5"/><path d="M8 14h5l1.5-3 2 6 1.5-3H24"/></g></symbol>
+    <symbol id="i-leaf" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 26C10 14 18 7 27 5c-1 10-8 18-21 21Z"/><path d="M6 26 18 14"/></g></symbol>
+    <symbol id="i-plaster" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="26" height="10" rx="5" transform="rotate(-40 16 16)"/><rect x="11" y="12" width="10" height="8" rx="1" transform="rotate(-40 16 16)"/><circle cx="14.5" cy="15.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="16.5" r=".5" fill="currentColor"/></g></symbol>
+    <symbol id="i-pulse" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27S4 20 4 11.5A6 6 0 0 1 16 9a6 6 0 0 1 12 2.5C28 20 16 27 16 27Z"/><path d="M7 16h5l2-4 3 7 2-3h6"/></g></symbol>
+    <symbol id="i-cal" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="22" height="20" rx="2"/><path d="M5 13h22M11 4v6M21 4v6"/><path d="m12 20 3 3 5-6"/></g></symbol>
+    <symbol id="i-pin" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28s9-8.5 9-15a9 9 0 0 0-18 0c0 6.5 9 15 9 15Z"/><circle cx="16" cy="13" r="3"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 16 16"><path d="M8 1.5a6.5 6.5 0 0 0-5.6 9.8L1.5 14.5l3.3-.9A6.5 6.5 0 1 0 8 1.5Zm3.2 9c-.1.4-.8.8-1.1.8-.3 0-.6.2-2.1-.4a7.2 7.2 0 0 1-2.9-2.6c-.2-.3-.7-1-.7-1.8s.4-1.2.6-1.4c.1-.2.3-.2.4-.2h.3c.1 0 .2 0 .4.3l.5 1.3c.1.1.1.2 0 .4l-.2.3-.3.3c-.1.1-.2.2-.1.4.1.2.5.8 1 1.3.7.6 1.3.8 1.5.9.2.1.3.1.4 0l.6-.7c.1-.2.3-.2.4-.1l1.3.6c.2.1.3.1.3.2.1 0 .1.4-.1.9Z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="intro" id="intro" aria-hidden="true">
+  <svg viewBox="0 0 120 120">
+    <path class="tube" pathLength="1" d="M38 21.9 A44 44 0 1 0 82 98.1" stroke="#E8C988" stroke-width="3"/>
+    <path class="tube" pathLength="1" d="M60 16 A44 44 0 0 1 98.1 82" stroke="#C69036" stroke-width="3"/>
+    <path class="beat" pathLength="1" d="M28 64 H44 L49 52 L54 74 L59 36 L64 82 L68 56 L71 62 H104" stroke="#FDFAF5" stroke-width="2"/>
+    <circle class="chest" cx="91" cy="91" r="9" fill="#C69036"/>
+  </svg>
+</div>
+
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Dr Nontu Medical Practice, home">
+      <svg aria-hidden="true"><use href="#mark"/></svg>
+      <span><b>DR NONTU</b><small>MEDICAL PRACTICE</small></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a class="link-u" href="#about">About</a>
+      <a class="link-u" href="#services">Services</a>
+      <a class="link-u" href="#ways">House calls</a>
+      <a class="link-u" href="#plans">Care plans</a>
+      <a class="link-u" href="#locations">Contact</a>
+    </nav>
+    <a class="btn magnetic" href="#book">Book a visit <svg><use href="#i-arrow"/></svg></a>
+  </div>
+</header>
+
+<main id="top">
+<!-- ═════════ HERO ═════════ -->
+<section class="hero" id="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow rv">General practice · Esther Park &amp; Fourways</span>
+        <h1 class="display" aria-label="A laugh when you need one. Answers when you need them. Hope on difficult days.">
+          <span class="ln" data-i="0"><span class="in">A laugh <em>when you need one.</em></span></span>
+          <span class="ln" data-i="1"><span class="in">Answers <em>when you need them.</em></span></span>
+          <span class="ln" data-i="2"><span class="in">Hope <em>on difficult days.</em></span></span>
+        </h1>
+      </div>
+      <div class="hero-visual rv" style="transition-delay:.3s">
+        <div class="hero-depth" id="heroDepth"><div class="hero-arch ph arch" id="heroArch" data-tilt="6">
+          <img class="on" src="https://images.unsplash.com/photo-1633945984522-a19268cc75ad?auto=format&fit=crop&w=900&q=75" alt="A cup of tea on a sunlit table">
+          <img src="https://images.unsplash.com/photo-1666887364752-29dcc75d6aee?auto=format&fit=crop&w=900&q=75" alt="A doctor's hands holding a stethoscope">
+          <img src="https://images.unsplash.com/photo-1623624728973-d613d34dfc86?auto=format&fit=crop&w=900&q=75" alt="A young olive branch reaching toward the light">
+        </div>
+        <div class="hero-3d stage3d" id="heroMark" aria-hidden="true"><canvas></canvas></div>
+        <svg class="badge" viewBox="0 0 120 120" aria-hidden="true">
+          <g class="ring">
+            <path id="circ" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0" fill="none"/>
+            <text><textPath href="#circ">Every patient · Expertly cared for · </textPath></text>
+          </g>
+          <circle cx="60" cy="60" r="30" fill="#FDFAF5"/>
+          <use href="#mark" x="40" y="40" width="40" height="40"/>
+        </svg></div>
+      </div>
+    </div>
+
+    <!-- signature: one continuous heartbeat; a beat per line -->
+    <div class="ecg" id="heroEcg" aria-hidden="true">
+      <svg class="ghost" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 110 H1440"/></svg>
+      <svg class="trace" viewBox="0 0 1440 160" preserveAspectRatio="none"><path id="heroPath" d="M0 110 H300 Q312 100 324 110 H334 L340 96 L346 120 L352 90 L358 118 L364 100 L370 112 L376 104 L382 110 Q394 101 406 110 H640 Q656 98 672 110 H684 L690 116 L700 46 L710 128 L716 110 H730 Q748 88 766 110 H1020 Q1036 98 1052 110 H1062 L1068 118 L1080 16 L1092 134 L1098 110 H1110 Q1130 84 1150 104 C1250 112 1330 72 1440 38"/></svg>
+      <span class="pulse" id="pulse"></span>
+    </div>
+
+    <div class="hero-foot">
+      <div>
+        <p class="lede rv">Meet Dr Nontu: a GP who listens first, explains clearly, and makes sure you leave knowing you'll be okay.</p>
+        <div class="ctas rv" style="transition-delay:.1s">
+          <a class="btn magnetic" href="#book">Book an appointment <svg><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--ghost magnetic" href="https://wa.me/27820503345"><svg><use href="#i-wa"/></svg> WhatsApp us</a>
+          <a class="btn btn--ghost magnetic" href="tel:+27820503345">Call 082 050 3345</a>
+        </div>
+      </div>
+      <div class="creds rv" style="transition-delay:.2s">
+        <b>Dr Nontuthuko Ndlovu</b>
+        <span>MBChB (UP) · BCMP (WSU) · DipPEC (CMSA)</span><br>
+        <span class="muted">General Practitioner · Primary &amp; Emergency Care</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>In-person consultations <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> House calls, <i>daily</i> <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Virtual care, <i>any hour</i> <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Esther Park <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Fourways <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg></span>
+      <span>In-person consultations <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> House calls, <i>daily</i> <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Virtual care, <i>any hour</i> <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Esther Park <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg> Fourways <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" stroke-width="1.5"/></svg></span>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ STATEMENT ═════════ -->
+<section class="statement" id="about">
+  <div class="wrap statement-grid">
+    <aside class="statement-aside">
+      <svg class="branch" id="branch" viewBox="0 0 340 420" aria-hidden="true">
+        <path class="stem" pathLength="1" d="M30 410 C70 330 110 280 170 210 S280 70 320 20"/>
+        <g id="leaves"></g>
+      </svg>
+      <div class="statement-ph ph arch mask-in" data-tilt="10"><img src="https://images.unsplash.com/photo-1596679223294-80bcca0f47d5?auto=format&fit=crop&w=600&q=70" alt="Olive branches in a white ceramic vase" loading="lazy"></div>
+    </aside>
+    <div>
+      <span class="eyebrow">Healthcare that feels personal</span>
+      <p class="statement-q display" id="statement">Sometimes you don't just need a doctor to treat what's wrong. You need someone who <em>listens.</em> Someone who <em>reassures</em> you. Someone who makes you feel you're going to be <em>okay.</em></p>
+      <div class="statement-sign rv">
+        <p class="muted">We provide comprehensive primary healthcare with a focus on prevention, early intervention and personalised treatment, in a warm, welcoming space where every patient is treated as an individual.</p>
+        <a class="link-u" href="#services">See how we can help →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ WAYS TO CONSULT ═════════ -->
+<section class="ways" id="ways">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">How would you like to consult?</span><h2 class="display">Care that meets you <em>where you are.</em></h2></div>
+      <p class="muted">Come to the practice, have Dr Nontu come to you, or talk from wherever you are. Every option books the same way.</p>
+    </div>
+    <div class="ways-grid">
+      <article class="way way-1 rv"><div class="way-3d stage3d" id="w3dA" aria-hidden="true"><canvas></canvas></div>
+        <div class="ph arch" data-tilt="8"><span class="way-tag"><svg><use href="#i-clinic"/></svg>In person</span><img data-par=".12" src="https://images.unsplash.com/photo-1787496994867-939269b4d323?auto=format&fit=crop&w=1000&q=75" alt="A calm hallway with botanical prints and a small seating area" loading="lazy"></div>
+        <div class="way-meta"><h3>At the practice</h3><span class="hrs tnum">Mon–Fri · 09:00–16:00</span></div>
+        <p class="muted">A private, face-to-face consultation in Esther Park or Fourways.</p>
+        <a class="link-u" href="#book">Book in person →</a>
+      </article>
+      <article class="way way-2 rv"><div class="way-3d stage3d" id="w3dB" aria-hidden="true"><canvas></canvas></div>
+        <div class="ph pill" data-tilt="8"><span class="way-tag"><svg><use href="#i-house"/></svg>House call</span><img data-par=".18" src="https://images.unsplash.com/photo-1559871753-75a00941f6b2?auto=format&fit=crop&w=900&q=75" alt="A green front door framed by climbing plants" loading="lazy"></div>
+        <div class="way-meta"><h3>At your home</h3><span class="hrs tnum">Daily · 09:00–16:00</span></div>
+        <p class="muted">Professional medical care in the comfort of your home, subject to availability and service area.</p>
+        <a class="link-u" href="#book">Book a house call →</a>
+      </article>
+      <article class="way way-3 rv"><div class="way-3d stage3d" id="w3dC" aria-hidden="true"><canvas></canvas></div>
+        <div class="ph" style="border-radius:6px" data-tilt="6"><span class="way-tag"><svg><use href="#i-screen"/></svg>Virtual</span><img data-par=".1" src="https://images.unsplash.com/photo-1618826908215-bf5c44ca24af?auto=format&fit=crop&w=1400&q=75" alt="A laptop on a desk beside houseplants" loading="lazy"></div>
+        <div class="way-meta"><h3>Wherever you are</h3><span class="hrs tnum">Any time · 24/7</span></div>
+        <p class="muted">Consult remotely by video, day or night. Ideal for follow-ups, scripts and quick questions.</p>
+        <a class="link-u" href="#book">Book a virtual consult →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═════════ CARE PLANS (3D capsules) ═════════ -->
+<section class="plans" id="plans">
+  <div class="wrap plans-grid">
+    <div>
+      <span class="eyebrow">Care plans</span>
+      <h2 class="display">Healthcare, <em>made simpler.</em></h2>
+      <p class="lede">One monthly plan covers your check&#8209;ins, follow&#8209;ups and quick questions, so you never hesitate to reach out.</p>
+      <div class="plan-cards">
+        <div class="plan rv" data-tilt="10"><h3><i style="background:linear-gradient(135deg,#F2F3F4,#AEB3B8)"></i>Silver</h3><p class="muted">Essential cover for everyday care and online questions.</p><span class="soon">Benefits &amp; price soon</span></div>
+        <div class="plan rv" data-tilt="10" style="transition-delay:.12s"><h3><i style="background:linear-gradient(135deg,#E8C988,#9A6A1E)"></i>Gold</h3><p class="muted">Fuller cover, including house calls and chronic care.</p><span class="soon">Benefits &amp; price soon</span></div>
+      </div>
+    </div>
+    <div class="plans-3d stage3d" id="plans3d" aria-hidden="true"><canvas></canvas></div>
+  </div>
+</section>
+
+<!-- ═════════ A DAY AT THE PRACTICE (hours as heartbeat) ═════════ -->
+<section class="day" id="hours">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Opening hours</span><h2 class="display">A day at the practice, <em>beat by beat.</em></h2></div>
+      <div class="day-side"><div class="day-3d stage3d" id="day3d" aria-hidden="true"><canvas></canvas></div><div class="now-pill" id="nowPill" role="status"><i></i><span>Checking who's available…</span></div></div>
+    </div>
+    <div class="tl" id="tl">
+      <div class="tl-cols"><div class="tl-track"><div class="tl-now" id="tlNow"><span id="tlNowLbl">Now</span></div></div></div>
+      <div class="tl-row"><div><h4>Virtual</h4><small>Every day · 24 hours</small></div><div class="tl-line" data-kind="virtual"></div></div>
+      <div class="tl-row"><div><h4>In person</h4><small>Mon–Fri · 09:00–16:00</small></div><div class="tl-line" data-kind="inperson"></div></div>
+      <div class="tl-row"><div><h4>House calls</h4><small>Daily · 09:00–16:00</small></div><div class="tl-line" data-kind="house"></div></div>
+      <div class="tl-axis tnum"><span></span><div><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ SERVICES ═════════ -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Our services</span><h2 class="display">One doctor, <em>the whole family.</em></h2></div>
+      <p class="muted">From a quick script to long-term care, and a referral when you need a specialist.</p>
+    </div>
+    <ul class="svc-list" id="svcList"></ul>
+  </div>
+  <div class="svc-float ph arch" id="svcFloat" aria-hidden="true"></div>
+</section>
+
+<!-- ═════════ BOOKING (step: date & time) ═════════ -->
+<section class="book" id="book">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Book an appointment</span><h2 class="display">Pick a time. <em>We'll take it from there.</em></h2></div>
+      <div class="day-side"><div class="book-3d stage3d" id="book3d" aria-hidden="true"><canvas></canvas></div><p class="muted">Choose how you'd like to be seen, then a date and time. Pay online now, or at your visit.</p></div>
+    </div>
+    <div class="book-card rv" data-tilt="2.5">
+      <ol class="stepper">
+        <li class="done"><b>1</b> Consultation</li>
+        <li class="done"><b>2</b> Location</li>
+        <li class="cur"><b>3</b> Date &amp; time</li>
+        <li><b>4</b> Your details</li>
+        <li><b>5</b> Confirm &amp; pay</li>
+      </ol>
+      <div class="book-body">
+        <div class="book-col">
+          <div class="types" role="group" aria-label="Consultation type">
+            <button class="type" aria-pressed="true" data-type="inperson"><svg><use href="#i-clinic"/></svg>In person</button>
+            <button class="type" aria-pressed="false" data-type="house"><svg><use href="#i-house"/></svg>House call</button>
+            <button class="type" aria-pressed="false" data-type="virtual"><svg><use href="#i-screen"/></svg>Virtual</button>
+          </div>
+          <div class="cal-head"><strong id="calTitle">—</strong><div class="cal-nav"><button id="calPrev" aria-label="Previous month">‹</button><button id="calNext" aria-label="Next month">›</button></div></div>
+          <div class="cal" id="cal"></div>
+        </div>
+        <div class="book-col">
+          <h4 id="slotTitle">Choose a date</h4>
+          <div id="slotWrap"><p class="empty">Days with a gold dot have open times.</p></div>
+        </div>
+        <div class="book-col summary">
+          <h4>Your visit</h4>
+          <div class="sum-row"><span>Type</span><span id="sumType">In person</span></div>
+          <div class="sum-row"><span>Where</span><span id="sumWhere">Esther Park</span></div>
+          <div class="sum-row"><span>When</span><span id="sumWhen" class="tnum">—</span></div>
+          <div class="pay" role="radiogroup" aria-label="Payment">
+            <label><input type="radio" name="pay" checked><span>Pay now, securely<small>Card, Instant EFT or Apple Pay via Paystack</small></span></label>
+            <label id="payLater"><input type="radio" name="pay"><span>Pay at my visit<small>Cash, card or medical aid on the day</small></span></label>
+          </div>
+          <a class="btn btn--light" href="#book" id="contBtn">Continue <svg><use href="#i-arrow"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ LOCATIONS ═════════ -->
+<section class="locs" id="locations">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">Practice locations</span><h2 class="display">Two rooms, <em>one standard of care.</em></h2></div></div>
+    <div class="locs-grid">
+      <div class="loc rv">
+        <span class="eyebrow">East Rand</span>
+        <h3>Esther Park</h3>
+        <address>95 Parkland Dr, Office 7B<br>Esther Park, Kempton Park, 1619</address>
+        <a class="link-u" href="https://maps.google.com/?q=95+Parkland+Dr+Esther+Park+Kempton+Park" target="_blank" rel="noopener">Get directions →</a>
+      </div>
+      <div class="map map-3d stage3d rv" id="map3d" aria-hidden="true"><canvas></canvas></div>
+      <div class="loc rv" style="transition-delay:.15s">
+        <span class="eyebrow">North</span>
+        <h3>Fourways</h3>
+        <address>The Parks Lifestyle Apartments<br>22 Century Boulevard, Fourways</address>
+        <a class="link-u" href="https://maps.google.com/?q=22+Century+Boulevard+Fourways" target="_blank" rel="noopener">Get directions →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ STYLE TILE ═════════ -->
+<section class="tile" id="tile">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">Style tile · for approval</span><h2 class="display">The system <em>behind the page.</em></h2></div><p class="muted">Every colour, face and icon on this page comes from these tokens.</p></div>
+    <div class="tile-grid">
+      <div data-tilt="4" class="tile-card swatches">
+        <h4>Palette</h4>
+        <div class="sw" style="background:#FDFAF5;border:1px solid var(--rule)"><b>Logo white</b>#FDFAF5 · ground</div>
+        <div class="sw" style="background:#31310F;color:#FDFAF5"><b>Logo olive</b>#31310F · text, depth</div>
+        <div class="sw" style="background:#6A6528;color:#FDFAF5"><b>Olive light</b>#6A6528 · emphasis</div>
+        <div class="sw" style="background:#C69036;color:#31310F"><b>Logo gold</b>#C69036 · the pulse</div>
+        <div class="sw" style="background:#7A5A22;color:#FDFAF5"><b>Gilded earth</b>#7A5A22 · labels</div>
+        <div class="sw" style="background:#EAE1CB"><b>Parchment</b>#EAE1CB · quiet fields</div>
+      </div>
+      <div data-tilt="4" class="tile-card types-card">
+        <h4>Type</h4>
+        <p class="spec-1">Hope <em>on difficult days.</em></p>
+        <div class="spec-meta"><span>Fraunces · Soft 100 · 340 / 300 italic</span><span>Display</span></div>
+        <p style="margin:22px 0 0;max-width:40ch">Hanken Grotesk carries the reading and the interface: plain, open and easy on tired eyes.</p>
+        <div class="spec-meta"><span>Hanken Grotesk · 400 / 600</span><span>Body &amp; UI</span></div>
+      </div>
+      <div data-tilt="4" class="tile-card icons-card">
+        <h4>Icons · 1.5px line, drawn for this practice</h4>
+        <div class="icon-row">
+          <figure><svg><use href="#i-clinic"/></svg>Practice</figure>
+          <figure><svg><use href="#i-house"/></svg>House call</figure>
+          <figure><svg><use href="#i-screen"/></svg>Virtual</figure>
+          <figure><svg><use href="#i-pulse"/></svg>Chronic</figure>
+          <figure><svg><use href="#i-leaf"/></svg>Wellness</figure>
+          <figure><svg><use href="#i-plaster"/></svg>Wounds</figure>
+          <figure><svg><use href="#i-cal"/></svg>Booking</figure>
+          <figure><svg><use href="#i-pin"/></svg>Location</figure>
+        </div>
+      </div>
+      <div data-tilt="4" class="tile-card ui-card">
+        <h4>Controls</h4>
+        <a class="btn magnetic" href="#book">Book an appointment <svg><use href="#i-arrow"/></svg></a>
+        <a class="btn btn--ghost magnetic" href="https://wa.me/27820503345"><svg><use href="#i-wa"/></svg> WhatsApp us</a>
+        <a class="link-u" href="#locations">Get directions →</a>
+        <div class="field"><label for="f1">Full name</label><input id="f1" placeholder="As it appears on your ID"></div>
+        <div class="field"><label for="f2">Mobile number</label><input id="f2" placeholder="082 000 0000" inputmode="tel"></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ═════════ FOOTER ═════════ -->
+<footer class="ftr">
+  <div class="ftr-3d stage3d" id="ftr3d" aria-hidden="true"><canvas></canvas></div>
+  <div class="wrap">
+    <div class="ftr-cta">
+      <h2 class="display">Come as a patient. <em>Leave feeling cared for.</em></h2>
+      <div class="ctas">
+        <a class="btn btn--light magnetic" href="#book">Book an appointment <svg><use href="#i-arrow"/></svg></a>
+        <a class="btn btn--ghost magnetic" style="--fg:var(--linen);border-color:rgba(253,250,245,.3)" href="https://wa.me/27820503345"><svg><use href="#i-wa"/></svg> WhatsApp us</a>
+      </div>
+    </div>
+    <div class="ecg ftr-ecg" aria-hidden="true">
+      <svg viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0 60 H980 Q992 52 1004 60 H1012 L1018 66 L1028 14 L1038 76 L1044 60 H1056 Q1072 44 1088 60 H1440"/></svg>
+    </div>
+    <div class="ftr-cols">
+      <div><h5>Visit</h5><a href="#locations">Esther Park</a><a href="#locations">Fourways</a><a href="#ways">House calls</a></div>
+      <div><h5>Practice</h5><a href="#about">About</a><a href="#services">Services</a><a href="#plans">Care plans</a><a href="#hours">Hours</a></div>
+      <div><h5>Talk to us</h5><a href="tel:+27820503345" class="tnum">+27 82 050 3345</a><a href="tel:+27607219660" class="tnum">+27 60 721 9660</a><a href="mailto:info@drnontu.co.za">info@drnontu.co.za</a></div>
+      <div><h5>Follow</h5><a href="#">Instagram</a><a href="#">Facebook</a><a href="https://wa.me/27820503345">WhatsApp</a></div>
+    </div>
+  </div>
+  <p class="ftr-big" aria-hidden="true"><span>D</span><span>r</span> <span>N</span><span>o</span><span>n</span><span>t</span><span>u</span></p>
+  <div class="ftr-legal"><div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px"><span>© 2026 Dr Nontu Medical Practice · Practice No. 1344625</span><span><a href="#">Privacy Policy</a> · <a href="#">POPIA</a> · <a href="#">Terms &amp; Conditions</a></span></div></div>
+</footer>
+
+<div class="mbar" id="mbar">
+  <a class="btn btn--light" href="#book">Book</a>
+  <a class="btn btn--ghost" href="https://wa.me/27820503345"><svg><use href="#i-wa"/></svg> WhatsApp</a>
+</div>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const img = (id, w = 900) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=72`;
+
+  /* ── smooth scroll ── */
+  let lenis;
+  if (!reduce && window.Lenis) {
+    lenis = new Lenis({ lerp: .09 });
+    const raf = t => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+    $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+      const t = a.getAttribute('href'); if (t.length < 2) return;
+      e.preventDefault(); lenis.scrollTo(t === '#top' ? 0 : t, { offset: -70, duration: 1.4 });
+    }));
+  }
+
+  /* ── intro → hero ── */
+  const hero = $('#hero'), ecg = $('#heroEcg'), intro = $('#intro');
+  const lines = $$('.hero h1 .ln'), arch = $$('#heroArch img');
+  let active = -1;
+  const setLine = i => {
+    if (i === active) return; active = i;
+    lines.forEach((l, k) => l.classList.toggle('on', k === i));
+    arch.forEach((m, k) => m.classList.toggle('on', k === i));
+  };
+  const beatX = [0.29, 0.54, 1]; // trace reveal stops: after each line's beat
+  const startHero = () => {
+    hero.classList.add('go');
+    $$('.hero .rv').forEach(el => el.classList.add('in'));
+    if (reduce) { ecg.style.setProperty('--reveal', 1); setLine(0); return; }
+    beatX.forEach((x, i) => setTimeout(() => { ecg.querySelector('.trace').style.setProperty('--reveal', x); setLine(i); }, 500 + i * 1100));
+    setTimeout(startPulse, 500 + 3 * 1100);
+    setTimeout(() => { setLine(0); cycle(); }, 500 + 3 * 1100 + 2600);
+  };
+  let cycleT, hovering = false;
+  const cycle = () => { clearInterval(cycleT); cycleT = setInterval(() => { if (!hovering) setLine((active + 1) % 3); }, 4200); };
+  lines.forEach((l, i) => {
+    l.addEventListener('mouseenter', () => { hovering = true; setLine(i); });
+    l.addEventListener('mouseleave', () => { hovering = false; });
+  });
+  const seen = sessionStorage.getItem?.('dn-intro');
+  if (reduce || seen) { intro.remove(); requestAnimationFrame(startHero); }
+  else {
+    try { sessionStorage.setItem('dn-intro', 1); } catch (e) {}
+    setTimeout(() => { intro.classList.add('done'); setTimeout(startHero, 250); setTimeout(() => intro.remove(), 1100); }, 1250);
+  }
+
+  /* ── pulse dot travels the heartbeat ── */
+  function startPulse() {
+    const p = $('#heroPath'), dot = $('#pulse'), L = p.getTotalLength();
+    dot.classList.add('live');
+    let t0 = performance.now();
+    const tick = now => {
+      const k = ((now - t0) / 5200) % 1;
+      const pt = p.getPointAtLength(k * L);
+      dot.style.left = (pt.x / 1440 * 100) + '%';
+      dot.style.top = (pt.y / 160 * 100) + '%';
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ── header + mobile bar ── */
+  const hdr = $('#hdr'), mbar = $('#mbar');
+  const onScroll = () => {
+    const y = scrollY;
+    hdr.classList.toggle('compact', y > 40);
+    mbar.classList.toggle('show', y > innerHeight * .6);
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* ── reveals ── */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .18, rootMargin: '0px 0px -6% 0px' });
+  $$('.rv:not(.hero .rv), .tl').forEach(el => io.observe(el));
+  // clipped elements never intersect, so masks reveal by position instead
+  const masks = $$('.mask-in');
+  const checkMasks = () => masks.forEach(m => { if (!m.classList.contains('in') && m.getBoundingClientRect().top < innerHeight * .85) m.classList.add('in'); });
+  addEventListener('scroll', checkMasks, { passive: true }); checkMasks();
+
+  /* ── statement: words light up with scroll ── */
+  const st = $('#statement');
+  (function split(node) {
+    [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(w => {
+          if (!w) return;
+          if (/^\s+$/.test(w)) frag.append(w);
+          else { const s = document.createElement('span'); s.className = 'w'; s.textContent = w; frag.append(s); }
+        });
+        n.replaceWith(frag);
+      } else split(n);
+    });
+  })(st);
+  const words = $$('.w', st);
+
+  /* ── olive branch, grown from code ── */
+  const leavesG = $('#leaves'), stem = $('#branch .stem');
+  const leafSpots = [[.12, -1], [.2, 1], [.3, -1], [.38, 1], [.48, -1], [.56, 1], [.65, -1], [.72, 1], [.8, -1], [.87, 1], [.94, -1]];
+  const SL = stem.getTotalLength();
+  const leafEls = leafSpots.map(([t, side], i) => {
+    const a = stem.getPointAtLength(t * SL), b = stem.getPointAtLength(Math.min(1, t + .01) * SL);
+    const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI + side * 52;
+    const len = 46 - t * 14;
+    const NS = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(NS, 'g'), leaf = document.createElementNS(NS, 'path');
+    g.setAttribute('transform', `translate(${a.x} ${a.y}) rotate(${ang})`);
+    leaf.setAttribute('class', 'leaf');
+    leaf.setAttribute('d', `M0 0 C${len * .3} ${-len * .2} ${len * .75} ${-len * .17} ${len} 0 C${len * .75} ${len * .17} ${len * .3} ${len * .2} 0 0 Z M0 0 L${len * .85} 0`);
+    leaf.dataset.t = t; g.append(leaf); leavesG.append(g);
+    return leaf;
+  });
+  [[.42, 14, 8], [.76, -12, 10]].forEach(([t, dx, dy]) => {
+    const a = stem.getPointAtLength(t * SL);
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    c.setAttribute('class', 'olive'); c.setAttribute('cx', a.x + dx); c.setAttribute('cy', a.y + dy); c.setAttribute('rx', 6); c.setAttribute('ry', 8.5);
+    c.dataset.t = t + .04; leavesG.append(c); leafEls.push(c);
+  });
+  const branch = $('#branch');
+
+  /* ── parallax on consult photos ── */
+  const pars = $$('[data-par]');
+
+  const scrollFx = () => {
+    const vh = innerHeight;
+    // statement
+    const r = st.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (vh * .78 - r.top) / (r.height + vh * .3)));
+    const n = Math.round(p * words.length * 1.05);
+    words.forEach((w, i) => w.classList.toggle('lit', i < n));
+    // branch
+    const br = branch.getBoundingClientRect();
+    const bp = Math.min(1, Math.max(0, (vh * .9 - br.top) / (br.height + vh * .2)));
+    branch.style.setProperty('--p', bp);
+    leafEls.forEach(l => l.classList.toggle('on', bp > +l.dataset.t));
+    // parallax
+    pars.forEach(im => {
+      const b = im.parentElement.getBoundingClientRect();
+      const c = (b.top + b.height / 2 - vh / 2) / vh;
+      im.style.setProperty('--py', (c * -100 * +im.dataset.par) + 'px');
+    });
+  };
+  if (reduce) { words.forEach(w => w.classList.add('lit')); branch.style.setProperty('--p', 1); leafEls.forEach(l => l.classList.add('on')); }
+  else { addEventListener('scroll', () => requestAnimationFrame(scrollFx), { passive: true }); scrollFx(); }
+
+  /* ── hours as heartbeats + live status (SAST) ── */
+  const sast = () => {
+    const parts = new Intl.DateTimeFormat('en-ZA', { timeZone: 'Africa/Johannesburg', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+    const get = t => parts.find(x => x.type === t).value;
+    return { wd: get('weekday'), h: +get('hour') % 24, m: +get('minute') };
+  };
+  const W = 1000, H = 56, mid = 32;
+  const beatAt = (x, a) => `L${x} ${mid} L${x + 4} ${mid + 4} L${x + 9} ${mid - a} L${x + 14} ${mid + a * .45} L${x + 18} ${mid} `;
+  $$('.tl-line').forEach(el => {
+    const kind = el.dataset.kind;
+    const [s, e] = kind === 'virtual' ? [0, 24] : [9, 16];
+    const xs = s / 24 * W, xe = e / 24 * W;
+    let on = `M${xs} ${mid} `;
+    const step = kind === 'virtual' ? 34 : 26;
+    for (let x = xs + 10, k = 0; x < xe - 22; x += step, k++) on += beatAt(x, kind === 'virtual' ? 14 + (k % 3) * 4 : 22 - (k % 2) * 6);
+    on += `L${xe} ${mid}`;
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path class="off" d="M0 ${mid} H${W}"/><path class="on" d="${on}"/></svg>`;
+  });
+  const now = sast();
+  const weekday = !['Sat', 'Sun'].includes(now.wd);
+  const inHours = now.h >= 9 && now.h < 16;
+  const pct = (now.h + now.m / 60) / 24;
+  const tlNow = $('#tlNow');
+  tlNow.style.left = `calc(${pct * 100}%)`;
+  $('#tlNowLbl').textContent = 'Now · ' + String(now.h).padStart(2, '0') + ':' + String(now.m).padStart(2, '0');
+  const open = ['Virtual consultations'];
+  if (inHours) open.push('house calls');
+  if (inHours && weekday) open.push('in-person visits');
+  $('#nowPill span').textContent = `Open now: ${open.join(', ').replace(/, ([^,]*)$/, ' and $1')}`;
+
+  /* ── services index with cursor-following photographs ── */
+  const services = [
+    ['In-person consultations', 'Assessment, diagnosis and treatment in a comfortable, private setting.', '1666887364752-29dcc75d6aee', ['clinic']],
+    ['House calls', 'Quality medical care in the comfort of your home.', '1559871753-75a00941f6b2', ['house']],
+    ['Virtual consultations', 'Convenient medical care from wherever you are.', '1618826908215-bf5c44ca24af', ['screen']],
+    ['Preventative healthcare', 'Health assessments, screening and guidance to help you stay well.', '1631815587646-b85a1bb027e1', ['clinic', 'house']],
+    ['Chronic care', 'Ongoing management and monitoring of chronic conditions.', '1666886573206-e31fe221db88', ['clinic', 'house', 'screen']],
+    ["Women's health", "Compassionate healthcare tailored to women's needs.", '1493894473891-10fc1e5dbd22', ['clinic', 'screen']],
+    ["Family & children's healthcare", 'Care for the whole family, including the little ones.', '1555252333-9f8e92e65df9', ['clinic', 'house']],
+    ['Minor procedures & wound care', 'Minor procedures, wound care and in-practice interventions.', '1609840534277-88833ef3ddeb', ['clinic']],
+    ['Wellness & health guidance', 'Practical support for your overall health and wellbeing.', '1690994065552-6a35a0455ea2', ['clinic', 'screen']],
+    ['Referrals', "When you need a specialist, we'll guide you to the right one.", '1604881991720-f91add269bed', ['clinic', 'screen']],
+  ];
+  const list = $('#svcList'), flo = $('#svcFloat');
+  services.forEach(([name, desc, id, modes], i) => {
+    const li = document.createElement('li'); li.className = 'svc rv';
+    li.innerHTML = `<a href="#book" data-i="${i}"><span class="svc-thumb ph round"><img src="${img(id, 200)}" alt="" loading="lazy"></span><h3>${name}</h3><p>${desc}</p><span class="modes">${modes.map(m => `<svg aria-hidden="true"><use href="#i-${m}"/></svg>`).join('')}</span></a>`;
+    list.append(li); io.observe(li);
+    const im = document.createElement('img'); im.src = img(id, 520); im.alt = ''; im.loading = 'lazy'; flo.append(im);
+  });
+  if (fine && !reduce) {
+    const fimgs = $$('img', flo);
+    let fx = 0, fy = 0, tx = 0, ty = 0, vis = false;
+    list.addEventListener('mousemove', e => { tx = e.clientX + 170; ty = e.clientY; });
+    $$('a', list).forEach(a => a.addEventListener('mouseenter', () => {
+      fimgs.forEach((m, k) => m.classList.toggle('on', k === +a.dataset.i));
+      flo.classList.add('show'); vis = true;
+    }));
+    list.addEventListener('mouseleave', () => { flo.classList.remove('show'); vis = false; });
+    const loop = () => { fx += (tx - fx) * .14; fy += (ty - fy) * .14; flo.style.left = fx + 'px'; flo.style.top = fy + 'px'; requestAnimationFrame(loop); };
+    loop();
+  }
+
+  /* ── booking: calendar + slots ── */
+  const state = { type: 'inperson', month: null, date: null, time: null };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  state.month = new Date(today.getFullYear(), today.getMonth(), 1);
+  const typeLabel = { inperson: 'In person', house: 'House call', virtual: 'Virtual' };
+  const whereLabel = { inperson: 'Esther Park', house: 'Your home', virtual: 'Video call' };
+  const isOpenDay = d => d >= today && (state.type === 'inperson' ? d.getDay() % 6 !== 0 : true) && (d - today) / 864e5 < 60;
+  const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const slotsFor = d => {
+    const range = state.type === 'virtual' ? [7, 22] : [9, 16];
+    const out = [];
+    for (let h = range[0]; h < range[1]; h++) for (const m of [0, 30]) {
+      const key = d.toDateString() + h + m + state.type;
+      out.push({ h, m, taken: hash(key) % 5 === 0 });
+    }
+    const isToday = d.getTime() === today.getTime();
+    const nowH = new Date().getHours() + 2;
+    return out.filter(s => !isToday || s.h >= nowH);
+  };
+  const cal = $('#cal'), fmtM = new Intl.DateTimeFormat('en-ZA', { month: 'long', year: 'numeric' });
+  const renderCal = () => {
+    $('#calTitle').textContent = fmtM.format(state.month);
+    $('#calPrev').disabled = state.month <= new Date(today.getFullYear(), today.getMonth(), 1);
+    cal.innerHTML = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => `<span class="dow">${d}</span>`).join('');
+    const y = state.month.getFullYear(), mo = state.month.getMonth();
+    const lead = (new Date(y, mo, 1).getDay() + 6) % 7;
+    for (let i = 0; i < lead; i++) cal.append(document.createElement('span'));
+    const days = new Date(y, mo + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const dt = new Date(y, mo, d), b = document.createElement('button');
+      b.textContent = d;
+      const ok = isOpenDay(dt) && slotsFor(dt).some(s => !s.taken);
+      b.disabled = !ok; if (ok) b.classList.add('avail');
+      if (state.date && dt.getTime() === state.date.getTime()) b.classList.add('sel');
+      b.setAttribute('aria-label', dt.toDateString() + (ok ? ', available' : ', unavailable'));
+      b.addEventListener('click', () => {
+        state.date = dt; state.time = null;
+        $$('.cal button.sel').forEach(x => x.classList.remove('sel'));
+        b.classList.add('sel', 'ripple'); setTimeout(() => b.classList.remove('ripple'), 700);
+        renderSlots(); renderSum();
+      });
+      cal.append(b);
+    }
+  };
+  const fmtD = new Intl.DateTimeFormat('en-ZA', { weekday: 'long', day: 'numeric', month: 'long' });
+  const renderSlots = () => {
+    const wrap = $('#slotWrap');
+    if (!state.date) { $('#slotTitle').textContent = 'Choose a date'; wrap.innerHTML = '<p class="empty">Days with a gold dot have open times.</p>'; return; }
+    $('#slotTitle').textContent = fmtD.format(state.date);
+    const groups = { Morning: [], Afternoon: [], Evening: [] };
+    slotsFor(state.date).forEach(s => (s.h < 12 ? groups.Morning : s.h < 17 ? groups.Afternoon : groups.Evening).push(s));
+    wrap.innerHTML = '';
+    let k = 0;
+    Object.entries(groups).forEach(([g, arr]) => {
+      if (!arr.length) return;
+      const box = document.createElement('div'); box.className = 'slot-group';
+      box.innerHTML = `<h5>${g}</h5><div class="slots"></div>`;
+      arr.forEach(s => {
+        const t = String(s.h).padStart(2, '0') + ':' + String(s.m).padStart(2, '0');
+        const b = document.createElement('button'); b.className = 'slot'; b.textContent = t;
+        b.style.animationDelay = (k++ * 22) + 'ms';
+        b.disabled = s.taken; b.setAttribute('aria-pressed', 'false');
+        if (s.taken) b.setAttribute('aria-label', t + ', booked');
+        b.addEventListener('click', () => { $$('.slot', wrap).forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true'); state.time = t; renderSum(); });
+        box.querySelector('.slots').append(b);
+      });
+      wrap.append(box);
+    });
+  };
+  const renderSum = () => {
+    $('#sumType').textContent = typeLabel[state.type];
+    $('#sumWhere').textContent = whereLabel[state.type];
+    $('#sumWhen').textContent = state.date ? new Intl.DateTimeFormat('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' }).format(state.date) + (state.time ? ' · ' + state.time : '') : '—';
+    const later = $('#payLater');
+    later.style.display = state.type === 'virtual' ? 'none' : '';
+    if (state.type === 'virtual') $('input', $('.pay')).checked = true;
+  };
+  $$('.type').forEach(b => b.addEventListener('click', () => {
+    $$('.type').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    state.type = b.dataset.type;
+    if (state.date && !isOpenDay(state.date)) state.date = null;
+    state.time = null; renderCal(); renderSlots(); renderSum();
+  }));
+  $('#calPrev').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); renderCal(); });
+  $('#calNext').addEventListener('click', () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1); renderCal(); });
+  $('#contBtn').addEventListener('click', e => e.preventDefault());
+  renderCal(); renderSum();
+
+
+  /* ── depth: tilt surfaces + hero layers ── */
+  if (fine && !reduce) {
+    $$('[data-tilt]').forEach(el => {
+      const max = +el.dataset.tilt || 6;
+      const gl = document.createElement('span'); gl.className = 'glare'; el.append(gl);
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        el.classList.add('tilting');
+        el.style.transform = `perspective(1000px) rotateX(${(.5 - y) * max}deg) rotateY(${(x - .5) * max}deg) translateZ(0)`;
+        el.style.setProperty('--gx', x * 100 + '%'); el.style.setProperty('--gy', y * 100 + '%');
+      });
+      el.addEventListener('pointerleave', () => { el.classList.remove('tilting'); el.style.transform = ''; });
+    });
+    const hd = $('#heroDepth'); let hx = 0, hy = 0, tx = 0, ty = 0;
+    addEventListener('pointermove', e => { tx = e.clientX / innerWidth - .5; ty = e.clientY / innerHeight - .5; }, { passive: true });
+    const hl = () => { hx += (tx - hx) * .06; hy += (ty - hy) * .06; hd.style.transform = `rotateY(${hx * 12}deg) rotateX(${-hy * 10}deg)`; $('.hero h1').style.transform = `translate3d(${hx * -14}px, ${hy * -10}px, 0)`; requestAnimationFrame(hl); };
+    hl();
+  }
+
+  /* ── magnetic buttons + cursor ── */
+  if (fine && !reduce) {
+    $$('.magnetic').forEach(b => {
+      b.addEventListener('mousemove', e => {
+        const r = b.getBoundingClientRect();
+        b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .22}px, ${(e.clientY - r.top - r.height / 2) * .32}px)`;
+      });
+      b.addEventListener('mouseleave', () => { b.style.transition = 'transform .6s cubic-bezier(.16,1,.3,1)'; b.style.transform = ''; setTimeout(() => b.style.transition = '', 600); });
+    });
+    const cur = $('#cursor'); let cx = 0, cy = 0, mx = 0, my = 0;
+    addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cur.style.opacity = 1; });
+    document.addEventListener('mouseleave', () => cur.style.opacity = 0);
+    const cl = () => { cx += (mx - cx) * .2; cy += (my - cy) * .2; cur.style.transform = `translate(${cx}px, ${cy}px)`; requestAnimationFrame(cl); };
+    cl();
+    document.addEventListener('mouseover', e => cur.classList.toggle('big', !!e.target.closest('a, button')));
+  }
+})();
+</script>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
+addEventListener('pointermove', e => { mouse.x = e.clientX / innerWidth * 2 - 1; mouse.y = e.clientY / innerHeight * 2 - 1; }, { passive: true });
+
+/* shared materials: everything comes from the palette */
+const MAT = {
+  brass:  () => new THREE.MeshPhysicalMaterial({ color: 0xD3A048, metalness: 1, roughness: .24 }),
+  silver: () => new THREE.MeshPhysicalMaterial({ color: 0xE3E5E8, metalness: 1, roughness: .18 }),
+  olive:  () => new THREE.MeshPhysicalMaterial({ color: 0x34330F, metalness: .05, roughness: .36, clearcoat: 1, clearcoatRoughness: .16 }),
+  moss:   () => new THREE.MeshPhysicalMaterial({ color: 0x6A6528, metalness: 0, roughness: .3, clearcoat: .9, clearcoatRoughness: .2 }),
+  linen:  () => new THREE.MeshPhysicalMaterial({ color: 0xFBF6EC, metalness: 0, roughness: .42, clearcoat: .7, clearcoatRoughness: .25, sheen: .4, sheenColor: new THREE.Color(0xffffff) }),
+  glow:   () => new THREE.MeshStandardMaterial({ color: 0xF5D48F, emissive: 0xE8B85A, emissiveIntensity: 2.4 }),
+};
+
+function stage(el, { fov = 30, z = 5, exposure = 1.05 } = {}) {
+  const canvas = el.querySelector('canvas');
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' }); }
+  catch (e) { el.style.display = 'none'; return null; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = exposure;
+  const scene = new THREE.Scene();
+  const pm = new THREE.PMREMGenerator(renderer);
+  scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture;
+  const key = new THREE.DirectionalLight(0xFFF1D6, 1.4); key.position.set(3, 4, 5); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xE8C988, .8); rim.position.set(-4, -1, -3); scene.add(rim);
+  const camera = new THREE.PerspectiveCamera(fov, 1, .1, 100); camera.position.set(0, 0, z);
+  const s = { el, renderer, scene, camera, frame: null, visible: true, t0: performance.now() };
+  const render = () => { s.frame && s.frame((performance.now() - s.t0) / 1000); renderer.render(scene, camera); };
+  const resize = () => {
+    const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (reduce) render();
+  };
+  new ResizeObserver(resize).observe(canvas); resize();
+  new IntersectionObserver(([e]) => { s.visible = e.isIntersecting; }, { rootMargin: '120px' }).observe(el);
+  s.start = () => {
+    el.classList.add('ready');
+    if (reduce) { render(); return; }
+    const loop = () => { requestAnimationFrame(loop); if (s.visible) render(); };
+    loop();
+  };
+  return s;
+}
+const ease = t => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 4);
+const tube = (curve, r, mat, seg = 64) => new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r, 20, false), mat);
+const ball = (r, mat, seg = 32) => new THREE.Mesh(new THREE.SphereGeometry(r, seg, seg), mat);
+
+/* ── 1 · hero: the logo mark, built in 3D ── */
+(() => {
+  const s = stage(document.getElementById('heroMark'), { fov: 30, z: 5.4 }); if (!s) return;
+  const P = (x, y, z = 0) => new THREE.Vector3((x - 60) / 44, -(y - 60) / 44, z);
+  const olive = MAT.olive(), brass = MAT.brass();
+  const g = new THREE.Group(); s.scene.add(g);
+  const R = 1, T = .078;
+  const a1 = new THREE.Mesh(new THREE.TorusGeometry(R, T, 32, 180, Math.PI), olive); a1.rotation.z = Math.PI * 2 / 3; g.add(a1);
+  const a2 = new THREE.Mesh(new THREE.TorusGeometry(R, T, 32, 120, Math.PI * 2 / 3), brass); a2.rotation.z = -Math.PI / 6; g.add(a2);
+  [[120, olive], [300, olive], [90, brass], [330, brass]].forEach(([deg, m]) => { const b = ball(T, m); const r = deg * Math.PI / 180; b.position.set(Math.cos(r) * R, Math.sin(r) * R, 0); g.add(b); });
+  // chestpiece
+  const cp = new THREE.Group(); cp.position.set(Math.cos(-Math.PI / 4) * R, Math.sin(-Math.PI / 4) * R, .02);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(.24, .24, .13, 64), brass); disc.rotation.x = Math.PI / 2; cp.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.15, .022, 16, 64), MAT.linen()); ring.position.z = .07; cp.add(ring);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, .02, 48), brass); cap.rotation.x = Math.PI / 2; cap.position.z = .07; cp.add(cap);
+  g.add(cp);
+  // earpieces
+  const e1 = new THREE.CubicBezierCurve3(P(14, 34), P(14, 52), P(18, 62), P(28, 64));
+  const e2 = new THREE.CubicBezierCurve3(P(42, 34), P(42, 52), P(38, 62), P(28, 64));
+  g.add(tube(e1, .045, brass), tube(e2, .045, brass));
+  [P(14, 32), P(42, 32)].forEach(p => { const b = ball(.075, olive); b.position.copy(p); g.add(b); });
+  // heartbeat
+  const pts = [[28, 64], [44, 64], [49, 52], [54, 74], [59, 36], [64, 82], [68, 56], [71, 62], [104, 60]].map(([x, y]) => P(x, y));
+  const ecg = new THREE.CurvePath(); for (let i = 0; i < pts.length - 1; i++) ecg.add(new THREE.LineCurve3(pts[i], pts[i + 1]));
+  g.add(tube(ecg, .034, olive, 400));
+  pts.forEach((p, i) => { if (i > 0 && i < pts.length - 1) { const b = ball(.034, olive, 16); b.position.copy(p); g.add(b); } });
+  const pulse = ball(.06, MAT.glow()); g.add(pulse);
+  const light = new THREE.PointLight(0xE8B85A, 1.2, 1.4); pulse.add(light);
+  g.rotation.set(.1, -.5, 0);
+  s.frame = t => {
+    mouse.sx += (mouse.x - mouse.sx) * .05; mouse.sy += (mouse.y - mouse.sy) * .05;
+    const k = ease((t - .6) / 1.6);
+    g.scale.setScalar(.55 + .45 * k);
+    g.rotation.y = -.5 * (1 - k) + Math.sin(t * .45) * .22 + mouse.sx * .55;
+    g.rotation.x = .1 + mouse.sy * .3;
+    g.rotation.z = Math.sin(t * .3) * .04;
+    g.position.y = Math.sin(t * 1.1) * .05;
+    pulse.position.copy(ecg.getPointAt((t * .32) % 1));
+  };
+  setTimeout(s.start, sessionStorage.getItem('dn-intro') ? 300 : 1500);
+})();
+
+/* ── 2 · care plans: silver & gold capsules ── */
+function capsule(top, bottom, band) {
+  const g = new THREE.Group(), r = .46, h = .95;
+  const hemi = (m, up) => { const me = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 32, 0, Math.PI * 2, up ? 0 : Math.PI / 2, Math.PI / 2), m); me.position.y = up ? h / 2 : -h / 2; return me; };
+  const cyl = (m, y) => { const me = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h / 2, 64, 1, true), m); me.position.y = y; return me; };
+  g.add(hemi(top, true), cyl(top, h / 4), cyl(bottom, -h / 4), hemi(bottom, false));
+  const seam = new THREE.Mesh(new THREE.TorusGeometry(r * 1.004, .014, 12, 96), band); seam.rotation.x = Math.PI / 2; g.add(seam);
+  return g;
+}
+(() => {
+  const el = document.getElementById('plans3d');
+  const s = stage(el, { fov: 32, z: 6.2 }); if (!s) return;
+  const silver = capsule(MAT.silver(), MAT.linen(), MAT.silver());
+  const gold = capsule(MAT.brass(), MAT.olive(), MAT.brass());
+  silver.position.set(-1.05, .25, 0); silver.rotation.z = .55;
+  gold.position.set(1, -.2, .4); gold.rotation.z = -.5; gold.scale.setScalar(1.12);
+  s.scene.add(silver, gold);
+  // pearls & beads in orbit
+  const orbit = new THREE.Group(); s.scene.add(orbit);
+  const beads = [];
+  for (let i = 0; i < 14; i++) {
+    const m = [MAT.linen(), MAT.brass(), MAT.moss(), MAT.silver()][i % 4];
+    const b = ball(.05 + (i % 3) * .035, m);
+    const a = i / 14 * Math.PI * 2, rr = 2.1 + (i % 3) * .25;
+    b.userData = { a, rr, y: (Math.random() - .5) * 1.6, sp: .12 + Math.random() * .1 };
+    orbit.add(b); beads.push(b);
+  }
+  // a single olive, because every plan grows from the same branch
+  const ol = ball(.2, MAT.moss(), 48); ol.scale.set(1, 1.35, 1); ol.position.set(.15, 1.25, -.6); s.scene.add(ol);
+  let prog = 0;
+  const onScroll = () => { const r = el.getBoundingClientRect(); prog = (innerHeight - r.top) / (innerHeight + r.height); };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  orbit.rotation.x = .35;
+  s.frame = t => {
+    mouse.sx += (mouse.x - mouse.sx) * .04; mouse.sy += (mouse.y - mouse.sy) * .04;
+    silver.rotation.y = t * .5 + prog * 4; silver.rotation.z = .55 + Math.sin(t * .6) * .08 - prog * .5; silver.position.y = .25 + Math.sin(t * .9) * .1;
+    gold.rotation.y = -t * .42 - prog * 4; gold.rotation.z = -.5 + Math.cos(t * .5) * .08 + prog * .5; gold.position.y = -.2 + Math.cos(t * .8) * .12;
+    beads.forEach(b => { const u = b.userData, a = u.a + t * u.sp; b.position.set(Math.cos(a) * u.rr, u.y + Math.sin(t + u.a) * .08, Math.sin(a) * u.rr * .6); });
+    ol.position.y = 1.25 + Math.sin(t * 1.2) * .06; ol.rotation.z = Math.sin(t * .7) * .2;
+    s.scene.rotation.y = mouse.sx * .25; s.scene.rotation.x = mouse.sy * .12;
+  };
+  s.start();
+})();
+
+/* ── 3 · footer: a slow field of the practice's small things ── */
+(() => {
+  const el = document.getElementById('ftr3d');
+  const s = stage(el, { fov: 38, z: 7, exposure: 1.15 }); if (!s) return;
+  const field = new THREE.Group(); s.scene.add(field);
+  const makers = [
+    () => { const c = capsule(MAT.brass(), MAT.linen(), MAT.brass()); c.scale.setScalar(.32); return c; },
+    () => { const c = capsule(MAT.silver(), MAT.moss(), MAT.silver()); c.scale.setScalar(.28); return c; },
+    () => ball(.16, MAT.brass()),
+    () => { const o = ball(.15, MAT.moss()); o.scale.set(1, 1.35, 1); return o; },
+    () => new THREE.Mesh(new THREE.TorusGeometry(.17, .04, 20, 64), MAT.brass()),
+    () => ball(.1, MAT.linen()),
+  ];
+  const items = [];
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  // the field keeps to the right of the headline and above the link columns
+  const halfW = () => Math.tan(THREE.MathUtils.degToRad(19)) * 7 * s.camera.aspect;
+  for (let i = 0; i < 14; i++) {
+    const m = makers[i % makers.length]();
+    const hw = halfW();
+    m.position.set(hw * (.42 + rnd() * .52), (rnd() - .5) * 4, (rnd() - .7) * 2.4);
+    m.rotation.set(rnd() * 6, rnd() * 6, rnd() * 6);
+    m.userData = { y: m.position.y, sp: .2 + rnd() * .5, ph: rnd() * 6, rs: (rnd() - .5) * .6 };
+    field.add(m); items.push(m);
+  }
+  s.frame = t => {
+    mouse.sx += (mouse.x - mouse.sx) * .03; mouse.sy += (mouse.y - mouse.sy) * .03;
+    items.forEach(m => { const u = m.userData; m.position.y = u.y + Math.sin(t * u.sp + u.ph) * .18; m.rotation.x += u.rs * .01; m.rotation.y += u.rs * .014; });
+    field.rotation.y = mouse.sx * .18; field.rotation.x = mouse.sy * .1;
+  };
+  s.start();
+})();
+
+/* ───────────── helpers for small objects ───────────── */
+const rr = (w, h, r) => { const sh = new THREE.Shape(), x = -w / 2, y = -h / 2;
+  sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r); sh.lineTo(x + w, y + h - r);
+  sh.quadraticCurveTo(x + w, y + h, x + w - r, y + h); sh.lineTo(x + r, y + h); sh.quadraticCurveTo(x, y + h, x, y + h - r);
+  sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y); return sh; };
+const slab = (w, h, d, r, mat, bev = .04) => { const g = new THREE.ExtrudeGeometry(rr(w, h, r), { depth: d, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 6, curveSegments: 18 }); g.center(); return new THREE.Mesh(g, mat); };
+const textTex = (lines, w = 512, h = 512) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  lines.forEach(([txt, font, color, y, track = 0]) => { x.font = font; x.fillStyle = color; x.textAlign = 'center'; x.textBaseline = 'middle'; if ('letterSpacing' in x) x.letterSpacing = track + 'px'; x.fillText(txt, w / 2, y); });
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+function floaty(id, build, { z = 4.4, fov = 30, spin = .45, tilt = .4, bob = .06 } = {}) {
+  const el = document.getElementById(id); if (!el) return;
+  const s = stage(el, { fov, z }); if (!s) return;
+  Promise.resolve(build(s)).then(g => {
+    s.scene.add(g); const b = g.rotation.clone(), anim = g.userData.anim;
+    s.frame = t => {
+      g.rotation.y = b.y + Math.sin(t * spin) * .45 + mouse.sx * tilt;
+      g.rotation.x = b.x + mouse.sy * tilt * .5;
+      g.position.y = Math.sin(t * 1.15) * bob;
+      anim && anim(t);
+    };
+    s.start();
+  });
+}
+const fontsReady = document.fonts ? Promise.all([document.fonts.load('300 200px Fraunces'), document.fonts.load('600 40px "Hanken Grotesk"')]).catch(() => {}) : Promise.resolve();
+
+/* ── ways · in person: a stethoscope chestpiece ── */
+floaty('w3dA', () => {
+  const g = new THREE.Group(), brass = MAT.brass();
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(.8, .84, .3, 72), brass); disc.rotation.x = Math.PI / 2; g.add(disc);
+  const dia = new THREE.Mesh(new THREE.CylinderGeometry(.64, .64, .32, 72), MAT.linen()); dia.rotation.x = Math.PI / 2; dia.position.z = .01; g.add(dia);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.7, .055, 20, 96), brass); ring.position.z = .17; g.add(ring);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(.11, .14, .55, 32), brass); stem.position.y = 1.05; g.add(stem);
+  g.add(tube(new THREE.CatmullRomCurve3([new THREE.Vector3(0, 1.3, 0), new THREE.Vector3(.15, 1.85, -.2), new THREE.Vector3(.8, 2.15, -.45), new THREE.Vector3(1.5, 2.1, -.7)]), .1, MAT.olive(), 80));
+  g.position.y = -.55; g.scale.setScalar(.82); g.rotation.set(.3, -.55, .12);
+  const outer = new THREE.Group(); outer.add(g); return outer;
+}, { z: 5 });
+
+/* ── ways · house call: a little house ── */
+floaty('w3dB', () => {
+  const g = new THREE.Group();
+  const sh = new THREE.Shape(); sh.moveTo(-1, -1); sh.lineTo(1, -1); sh.lineTo(1, .3); sh.lineTo(0, 1.25); sh.lineTo(-1, .3); sh.closePath();
+  const body = new THREE.ExtrudeGeometry(sh, { depth: 1.1, bevelEnabled: true, bevelThickness: .05, bevelSize: .05, bevelSegments: 5 }); body.translate(0, 0, -.55);
+  g.add(new THREE.Mesh(body, MAT.linen()));
+  const roof = MAT.olive();
+  [[-1, 1], [1, -1]].forEach(([sx, rz]) => { const r = new THREE.Mesh(new THREE.BoxGeometry(1.62, .13, 1.36), roof); r.position.set(sx * .53, .82, 0); r.rotation.z = rz * .76; g.add(r); });
+  const door = slab(.42, .72, .06, .2, MAT.brass(), .03); door.position.set(0, -.6, .62); g.add(door);
+  const knob = ball(.035, MAT.olive(), 12); knob.position.set(.12, -.6, .68); g.add(knob);
+  [-.55, .55].forEach(x => { const w = slab(.34, .34, .04, .05, MAT.olive(), .025); w.position.set(x, -.1, .61); g.add(w); });
+  const ch = new THREE.Mesh(new THREE.BoxGeometry(.22, .5, .22), MAT.brass()); ch.position.set(.56, 1.0, -.25); g.add(ch);
+  g.scale.setScalar(.82); g.rotation.set(.18, -.6, 0); return g;
+}, { z: 5 });
+
+/* ── ways · virtual: a phone with a live heartbeat ── */
+floaty('w3dC', () => {
+  const g = new THREE.Group();
+  g.add(slab(1.25, 2.3, .14, .24, MAT.olive()));
+  const scr = new THREE.Mesh(new THREE.ShapeGeometry(rr(1.06, 2.06, .16), 12), new THREE.MeshPhysicalMaterial({ color: 0x1E1D07, roughness: .12, clearcoat: 1, metalness: .2 })); scr.position.z = .112; g.add(scr);
+  const pts = [[-.42, 0], [-.18, 0], [-.12, .18], [-.06, -.22], [0, .42], [.06, -.3], [.12, .06], [.18, 0], [.42, 0]].map(([x, y]) => new THREE.Vector3(x, y, .125));
+  const path = new THREE.CurvePath(); for (let i = 0; i < pts.length - 1; i++) path.add(new THREE.LineCurve3(pts[i], pts[i + 1]));
+  g.add(tube(path, .016, MAT.glow(), 160));
+  const dot = ball(.035, MAT.glow(), 16); g.add(dot);
+  const cam = ball(.035, MAT.brass(), 16); cam.position.set(0, .93, .12); g.add(cam);
+  const pill = slab(.32, .06, .01, .03, MAT.brass(), .01); pill.position.set(0, -.88, .12); g.add(pill);
+  g.userData.anim = t => dot.position.copy(path.getPointAt((t * .45) % 1));
+  g.scale.setScalar(.92); g.rotation.set(.12, .5, -.1); return g;
+}, { z: 4.6 });
+
+/* ── hours · a 24-hour orbit, set to the real time in SAST ── */
+floaty('day3d', () => {
+  const g = new THREE.Group(), R = 1.35;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(R, .016, 12, 200), MAT.brass()); g.add(ring);
+  const ang = h => Math.PI / 2 - (h - 12) / 24 * Math.PI * 2;
+  for (let h = 0; h < 24; h++) {
+    const open = h >= 9 && h < 16;
+    const b = ball(open ? .075 : .04, open ? MAT.brass() : MAT.silver(), 20);
+    b.position.set(Math.cos(ang(h)) * R, Math.sin(ang(h)) * R, 0); g.add(b);
+  }
+  const parts = new Intl.DateTimeFormat('en-ZA', { timeZone: 'Africa/Johannesburg', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+  const hh = +parts.find(p => p.type === 'hour').value % 24 + +parts.find(p => p.type === 'minute').value / 60;
+  const sun = ball(.17, MAT.glow(), 40); sun.position.set(Math.cos(ang(hh)) * R, Math.sin(ang(hh)) * R, 0); g.add(sun);
+  const sl = new THREE.PointLight(0xF2C66B, 2, 2.2); sun.add(sl);
+  const moon = ball(.12, MAT.linen(), 32); moon.position.set(Math.cos(ang(hh) + Math.PI) * R * .62, Math.sin(ang(hh) + Math.PI) * R * .62, .1); g.add(moon);
+  const hub = ball(.09, MAT.brass(), 24); g.add(hub);
+  const hand = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, R * .9, 8), MAT.brass());
+  hand.position.set(Math.cos(ang(hh)) * R * .45, Math.sin(ang(hh)) * R * .45, 0); hand.rotation.z = ang(hh) - Math.PI / 2; g.add(hand);
+  g.rotation.set(-.55, .25, 0);
+  return g;
+}, { z: 5.2, spin: .3, tilt: .3, bob: .04 });
+
+/* ── booking · a desk calendar showing today ── */
+floaty('book3d', async () => {
+  await fontsReady;
+  const g = new THREE.Group(), now = new Date();
+  g.add(slab(1.6, 1.75, .5, .2, MAT.linen()));
+  const band = slab(1.6, .46, .52, .2, MAT.olive()); band.position.y = .645; g.add(band);
+  [-.45, .45].forEach(x => { const r = new THREE.Mesh(new THREE.TorusGeometry(.14, .035, 14, 48), MAT.brass()); r.rotation.y = Math.PI / 2; r.position.set(x, .9, 0); g.add(r); });
+  const month = now.toLocaleString('en-ZA', { month: 'long' }).toUpperCase();
+  const wd = now.toLocaleString('en-ZA', { weekday: 'long' }).toUpperCase();
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(1.5, .4), new THREE.MeshBasicMaterial({ map: textTex([[month, '600 54px "Hanken Grotesk", sans-serif', '#E8C988', 64, 14]], 512, 128), transparent: true }));
+  top.position.set(0, .64, .306); g.add(top);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.3), new THREE.MeshBasicMaterial({ map: textTex([[String(now.getDate()), '300 300px Fraunces, serif', '#31310F', 230], [wd, '600 40px "Hanken Grotesk", sans-serif', '#8C6119', 430, 10]], 512, 512 * 1.3 / 1.5), transparent: true }));
+  face.position.set(0, -.2, .3); g.add(face);
+  g.scale.setScalar(.95); g.rotation.set(.1, -.45, .06); return g;
+}, { z: 4.8 });
+
+/* ── locations · a tabletop map with two pins and a travelling pulse ── */
+(() => {
+  const el = document.getElementById('map3d'); if (!el) return;
+  const s = stage(el, { fov: 30, z: 6 }); if (!s) return;
+  s.camera.position.set(0, 5.5, 7.6); s.camera.lookAt(0, .25, 0);
+  const g = new THREE.Group(); s.scene.add(g);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, .14, 128), new THREE.MeshPhysicalMaterial({ color: 0xEAE1CB, roughness: .85, clearcoat: .3 })); g.add(base);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(2.3, .03, 12, 200), MAT.brass()); rim.rotation.x = Math.PI / 2; rim.position.y = .07; g.add(rim);
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0xCFC3A6, roughness: 1 });
+  const V = (x, z) => new THREE.Vector3(x, .075, z);
+  [[V(-2.1, -.9), V(-.6, -.5), V(.8, -1), V(2.1, -.6)], [V(-1.9, .9), V(-.4, .3), V(.9, .6), V(2, 1)], [V(-.7, -2), V(-.3, -.4), V(-.5, .8), V(-.1, 2.1)], [V(.9, -1.9), V(1.2, -.2), V(.9, 1.1), V(1.3, 1.8)]]
+    .forEach(p => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p), 80, .022, 6), roadMat)));
+  const A = new THREE.Vector3(-1.2, .07, -.55), B = new THREE.Vector3(1.2, .07, .55);
+  const pin = (p, mat) => { const pg = new THREE.Group(); pg.position.copy(p);
+    const head = ball(.17, mat, 40); head.position.y = .66; pg.add(head);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(.11, .5, 32), mat); cone.rotation.x = Math.PI; cone.position.y = .36; pg.add(cone);
+    const dot = ball(.06, MAT.linen(), 16); dot.position.set(0, .66, .15); pg.add(dot);
+    const sh = new THREE.Mesh(new THREE.CircleGeometry(.2, 32), new THREE.MeshBasicMaterial({ color: 0x31310F, transparent: true, opacity: .18 })); sh.rotation.x = -Math.PI / 2; sh.position.y = .005; pg.add(sh);
+    g.add(pg); return pg; };
+  const pA = pin(A, MAT.brass()), pB = pin(B, MAT.olive());
+  const arc = new THREE.QuadraticBezierCurve3(A.clone().setY(.1), new THREE.Vector3(0, 1.5, 0), B.clone().setY(.1));
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(arc, 120, .02, 10), new THREE.MeshStandardMaterial({ color: 0xE8C988, emissive: 0xC69036, emissiveIntensity: .5 })));
+  const pulse = ball(.05, MAT.glow(), 16); g.add(pulse);
+  fontsReady.then(() => {
+    [[pA, 'ESTHER PARK'], [pB, 'FOURWAYS']].forEach(([p, label]) => {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: textTex([[label, '600 46px "Hanken Grotesk", sans-serif', '#31310F', 64, 12]], 512, 128), transparent: true, depthTest: false }));
+      sp.scale.set(1.7, .425, 1); sp.position.y = 1.12; p.add(sp);
+    });
+  });
+  s.frame = t => {
+    g.rotation.y = Math.sin(t * .2) * .18 + mouse.sx * .35;
+    pA.position.y = A.y + Math.abs(Math.sin(t * 1.6)) * .08;
+    pB.position.y = B.y + Math.abs(Math.sin(t * 1.6 + 1.3)) * .08;
+    pulse.position.copy(arc.getPointAt((Math.sin(t * .6) + 1) / 2));
+  };
+  s.start();
+})();
+</script>
+</body>
+</html>
