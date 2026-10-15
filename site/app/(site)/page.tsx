@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { Hero } from '@/components/site/Hero';
 import { ServicesIndex } from '@/components/site/ServicesIndex';
 import { SecHead, Ways, PlansBlock, LocationsBlock } from '@/components/site/Sections';
-import { Icon, WhatsAppIcon } from '@/components/site/Icon';
-import { img, photos, practice, services, tel, waLink } from '@/lib/content';
+import { Icon } from '@/components/site/Icon';
+import { MessageButton } from '@/components/site/MessageButton';
+import { img, photos, practice, services, tel } from '@/lib/content';
 import { pageMeta } from '@/lib/seo';
 
 export const generateMetadata = () => pageMeta('/');
@@ -17,7 +18,7 @@ export default function Home() {
             <p className="lede rv">Meet Dr Nontu: a GP who listens first, explains clearly, and makes sure you leave knowing you&rsquo;ll be okay.</p>
             <div className="ctas rv">
               <Link className="btn" href="/book" data-track="hero_book">Book an appointment <Icon name="arrow" /></Link>
-              <a className="btn btn--ghost" href={waLink()}><WhatsAppIcon /> WhatsApp us</a>
+              <MessageButton />
               <a className="btn btn--ghost" href={tel(practice.phones[0])}>Call {practice.phones[0].replace('+27 ', '0')}</a>
             </div>
           </div>

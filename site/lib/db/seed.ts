@@ -12,7 +12,7 @@ export const seoDefaults: Record<string, [string, string]> = {
   '/house-calls': ['House calls | Dr Nontu Medical Practice', 'A GP who comes to you. House calls daily from 09:00 to 16:00 around Kempton Park and Fourways.'],
   '/care-plans': ['Membership | Dr Nontu Medical Practice', 'Silver (R149/month) and Gold (R399/month) memberships: brief medical queries, prescription savings and priority access.'],
   '/fees': ['Fees & medical aid | Dr Nontu Medical Practice', 'Consultation fees by type and length, payment options and medical aid information.'],
-  '/contact': ['Locations & contact | Dr Nontu Medical Practice', 'Practices in Esther Park (Kempton Park) and Fourways. Call, WhatsApp or book online.'],
+  '/contact': ['Locations & contact | Dr Nontu Medical Practice', 'Practices in Esther Park (Kempton Park) and Fourways. Call, send a message or book online.'],
   '/faq': ['FAQ | Dr Nontu Medical Practice', 'Appointments, walk-ins, medical aid, house calls, virtual consultations and payments.'],
   '/book': ['Book an appointment | Dr Nontu Medical Practice', 'Choose in person, house call or virtual, pick a length and a time, and pay online or at your visit.'],
 };

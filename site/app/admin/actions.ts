@@ -142,6 +142,16 @@ export async function saveSeo(path: string, f: FormData) {
   refresh(true); back(`/admin/seo?page=${encodeURIComponent(path)}`, 'Saved. Search engines will see it on their next visit.');
 }
 
+/* ── messages ── */
+export async function messageAction(id: string, f: FormData) {
+  await requireAdmin();
+  const handled = s(f, 'op') === 'handled';
+  await q(`update messages set handled_at = ${handled ? 'now()' : 'null'} where id = $1`, [id]);
+  refresh();
+  const view = s(f, 'view');
+  back(`/admin/messages${view ? `?view=${encodeURIComponent(view)}` : ''}`, handled ? 'Marked as handled.' : 'Moved back to open.');
+}
+
 /* ── settings ── */
 export async function saveSettings(f: FormData) {
   await requireAdmin();

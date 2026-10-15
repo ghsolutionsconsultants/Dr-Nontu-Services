@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation';
 import { membershipByToken, planById } from '@/lib/membership';
 import { MemberActions } from '@/components/membership/MemberActions';
 import { fmtDate, rands } from '@/lib/time';
-import { membershipNote, waLink } from '@/lib/content';
-import { WhatsAppIcon } from '@/components/site/Icon';
+import Link from 'next/link';
+import { hasWhatsApp, membershipNote } from '@/lib/content';
+import { Icon } from '@/components/site/Icon';
+import { MessageButton } from '@/components/site/MessageButton';
 
 export const metadata = { title: 'Your membership', robots: { index: false } };
 export const dynamic = 'force-dynamic';
@@ -27,11 +29,12 @@ export default async function MembershipPage(props: PageProps<'/membership/[toke
           </h1>
           {sp.payment === 'failed' && <p className="notice notice--error" style={{ marginTop: 24 }}>Your payment didn&rsquo;t go through, so the membership hasn&rsquo;t started. You can try again from the plans page.</p>}
           <p className="lede" style={{ marginTop: 18 }}>
-            {m.status === 'active' ? <>Your membership is active. Have a brief, non-urgent medical query? Send it on WhatsApp or by email; that&rsquo;s what your membership is for.</> :
+            {m.status === 'active' ? <>Your membership is active. Have a brief, non-urgent medical query? Send it to us with the message form{hasWhatsApp ? ', on WhatsApp' : ''} or by email; that&rsquo;s what your membership is for.</> :
               m.status === 'cancelled' ? <>This membership is cancelled and no further payments will be taken.</> : <>{STATUS[m.status]}.</>}
           </p>
           <div className="ctas">
-            {m.status === 'active' && <a className="btn" href={waLink('Hi, I am a member and have a brief medical query.')}><WhatsAppIcon /> Send a query</a>}
+            {m.status === 'active' && <Link className="btn" href="/contact?topic=member#message"><Icon name="mail" /> Send a query</Link>}
+            {m.status === 'active' && hasWhatsApp && <MessageButton text="Hi, I am a member and have a brief medical query." label="Query on WhatsApp" />}
             <MemberActions token={token} live={live} />
           </div>
         </div>

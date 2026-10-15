@@ -23,7 +23,7 @@ export interface Booking {
 }
 
 export class BookingError extends Error {
-  constructor(public code: 'slot_taken' | 'invalid' | 'not_found' | 'too_late' | 'not_allowed', message: string) { super(message); }
+  constructor(public code: 'slot_taken' | 'invalid' | 'not_found' | 'too_late' | 'not_allowed' | 'too_many', message: string) { super(message); }
 }
 
 export async function getSetting<T>(key: string, fallback: T): Promise<T> {
@@ -175,7 +175,7 @@ export async function cancelBooking(b: Booking, opts: { by: 'patient' | 'admin';
   if (opts.by === 'patient') {
     const s = await bookingSettings();
     if (new Date(b.start_at).getTime() - Date.now() < s.cancelCutoffHours * 3_600_000)
-      throw new BookingError('too_late', `Bookings can be cancelled online up to ${s.cancelCutoffHours} hours before. Please WhatsApp or call us.`);
+      throw new BookingError('too_late', `Bookings can be cancelled online up to ${s.cancelCutoffHours} hours before. Please call us or send a message.`);
   }
   const [u] = await q<Booking>(
     `update bookings set status = 'cancelled', cancelled_at = now(), cancel_reason = $2, updated_at = now(),
@@ -190,7 +190,7 @@ export async function rescheduleBooking(b: Booking, startIso: string, opts: { ad
   if (!opts.admin) {
     const s = await bookingSettings();
     if (new Date(b.start_at).getTime() - Date.now() < s.cancelCutoffHours * 3_600_000)
-      throw new BookingError('too_late', `Bookings can be moved online up to ${s.cancelCutoffHours} hours before. Please WhatsApp or call us.`);
+      throw new BookingError('too_late', `Bookings can be moved online up to ${s.cancelCutoffHours} hours before. Please call us or send a message.`);
     const slots = await getSlots({ type: b.consult_type, location: b.location_id, duration: b.duration_minutes, date: dateKey(start), excludeId: b.id });
     if (!slots.some((x) => x.getTime() === start.getTime())) throw new BookingError('slot_taken', 'That time is not available. Please choose another.');
   }

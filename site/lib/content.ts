@@ -12,13 +12,15 @@ export const practice = {
   email: 'info@drnontu.co.za',
   // the practice email has occasional hiccups, so the Gmail address is shown too and gets booking alerts
   emails: ['info@drnontu.co.za', 'drnontumedicalpractice@gmail.com'],
-  // TODO(client): confirm this bookings number is also the WhatsApp number
-  whatsapp: '27689820921',
+  // TODO(client): WhatsApp number to follow (the bookings number is not on WhatsApp).
+  // While this is empty, WhatsApp buttons become "Send a message" links to the contact form.
+  whatsapp: '',
   social: { instagram: '', facebook: '', tiktok: '' },
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
 };
 
 export const tel = (p: string) => 'tel:' + p.replace(/\s/g, '');
+export const hasWhatsApp = Boolean(practice.whatsapp);
 export const waLink = (text?: string) => `https://wa.me/${practice.whatsapp}${text ? '?text=' + encodeURIComponent(text) : ''}`;
 
 // Photos are either the practice's own files in /public/photos ("/photos/reception.jpg") or stock placeholders (Unsplash ids).
@@ -85,7 +87,6 @@ export const services: {
 
 export const locations = [
   { id: 'esther-park', name: 'Esther Park', kind: 'clinic' as const, region: 'Kempton Park',
-    // TODO(client): office number: the brief said 7B, the latest contact details say 78
     address: ['95 Parkland Drive, Office 78', 'Esther Park, Kempton Park, 1619'],
     map: 'https://maps.google.com/?q=95+Parkland+Dr+Esther+Park+Kempton+Park',
     embed: 'https://maps.google.com/maps?q=95%20Parkland%20Dr%2C%20Esther%20Park%2C%20Kempton%20Park&z=15&output=embed',
@@ -105,8 +106,8 @@ export const hours = [
 
 // TODO(client): answers drafted from the brief; confirm medical aids, fees and walk-in policy.
 export const faq: { q: string; a: string }[] = [
-  { q: 'Do I need an appointment?', a: 'We recommend booking so that we can give you unhurried time. You can book online in under a minute, or WhatsApp or call us.' },
-  { q: 'Do you accept walk-ins?', a: 'Booked patients are seen first. If you are unwell and cannot find a time, WhatsApp or call us and we will do our best to see you the same day.' },
+  { q: 'Do I need an appointment?', a: 'We recommend booking so that we can give you unhurried time. You can book online in under a minute, or call us or send a message.' },
+  { q: 'Do you accept walk-ins?', a: 'Booked patients are seen first. If you are unwell and cannot find a time, call us or send a message and we will do our best to see you the same day.' },
   { q: 'What medical aids do you accept?', a: 'Please contact the practice to confirm your medical aid before your visit. You can also pay at the visit and claim back from your scheme.' },
   { q: 'How much is a consultation?', a: 'Fees depend on the type and length of consultation you choose. You will see the exact fee before you confirm your booking, and on our Fees page.' },
   { q: 'Do you offer house calls?', a: 'Yes. House calls are available daily from 09:00 to 16:00, subject to availability and service area.' },
@@ -115,20 +116,21 @@ export const faq: { q: string; a: string }[] = [
   { q: 'What minor surgical procedures do you perform?', a: 'Wound care and dressing, suturing and stitch removal, abscess drainage and other appropriate in-practice procedures. Ask us if you are unsure.' },
   { q: 'Do you treat children?', a: 'Yes. We care for the whole family, from babies to grandparents.' },
   { q: 'What should I bring to my appointment?', a: 'Your ID, medical aid card (if you have one), a list of your current medication and any recent results or letters.' },
-  { q: 'How do I cancel an appointment?', a: 'Use the "Manage booking" link in your confirmation email, or WhatsApp or call us.' },
+  { q: 'How do I cancel an appointment?', a: 'Use the "Manage booking" link in your confirmation email, or call us or send a message.' },
   { q: 'How do I reschedule an appointment?', a: 'Open the "Manage booking" link in your confirmation email and pick a new time, or contact us and we will move it for you.' },
   { q: 'What payment methods do you accept?', a: 'Card, Instant EFT and Apple Pay online via Paystack, or cash, card and medical aid at your visit. Virtual consultations are paid online when you book.' },
 ];
 
 // Membership (care plans), as supplied by Dr Nontu
 export const membershipNote = 'Membership benefits are for non-urgent healthcare support and continuity of care.';
-export const memberships: { id: 'silver' | 'gold'; name: string; label: string; priceCents: number; benefits: string[] }[] = [
-  { id: 'silver', name: 'Silver', label: 'Essential Care', priceCents: 14900, benefits: [
+// queries = brief medical queries included per month
+export const memberships: { id: 'silver' | 'gold'; name: string; label: string; priceCents: number; queries: number; benefits: string[] }[] = [
+  { id: 'silver', name: 'Silver', label: 'Essential Care', priceCents: 14900, queries: 2, benefits: [
     'Up to 2 brief, non-urgent medical queries per month',
     '50% off one prescription service per month',
     'Monthly health & wellness newsletter',
   ] },
-  { id: 'gold', name: 'Gold', label: 'Enhanced Care', priceCents: 39900, benefits: [
+  { id: 'gold', name: 'Gold', label: 'Enhanced Care', priceCents: 39900, queries: 2, benefits: [
     'Up to 2 brief, non-urgent medical queries per month',
     '50% off one prescription service per month',
     'Priority access to available appointments',
@@ -136,6 +138,14 @@ export const memberships: { id: 'silver' | 'gold'; name: string; label: string; 
     'Monthly health & wellness newsletter',
   ] },
 ];
+
+// What the contact form can be about. Members' brief medical queries are counted against their monthly allowance.
+export const messageTopics = [
+  { id: 'general', label: 'General enquiry' },
+  { id: 'booking', label: 'About a booking' },
+  { id: 'member', label: 'Member query (brief, non-urgent)' },
+] as const;
+export type MessageTopic = (typeof messageTopics)[number]['id'];
 
 export const nav = [
   { href: '/about', label: 'About' },

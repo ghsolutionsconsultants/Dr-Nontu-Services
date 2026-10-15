@@ -1,8 +1,9 @@
 // Server-rendered building blocks shared by the home page and inner pages.
 import Link from 'next/link';
-import { img, photos, locations, practice, waLink, memberships, membershipNote } from '@/lib/content';
+import { img, photos, locations, practice, memberships, membershipNote } from '@/lib/content';
 import { Scene3D } from '../three/Scene3D';
-import { Icon, WhatsAppIcon } from './Icon';
+import { Icon } from './Icon';
+import { MessageButton } from './MessageButton';
 import { rands } from '@/lib/time';
 
 export function SecHead({ eyebrow, title, aside, as: H = 'h2' }: { eyebrow: string; title: React.ReactNode; aside?: React.ReactNode; as?: 'h1' | 'h2' }) {
@@ -125,7 +126,7 @@ export function CtaBand({ title = <>Ready when <em>you are.</em></> }: { title?:
       <h2 className="display">{title}</h2>
       <div className="ctas" style={{ marginTop: 0 }}>
         <Link className="btn btn--light" href="/book">Book an appointment <Icon name="arrow" /></Link>
-        <a className="btn btn--on-dark" href={waLink()}><WhatsAppIcon /> WhatsApp us</a>
+        <MessageButton className="btn btn--on-dark" />
       </div>
     </div>
   );

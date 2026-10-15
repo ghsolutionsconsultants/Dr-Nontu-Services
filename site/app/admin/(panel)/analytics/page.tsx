@@ -4,7 +4,7 @@ import { Donut, TrafficChart } from '@/components/admin/Charts';
 import { services } from '@/lib/content';
 
 export const metadata = { title: 'Site stats' };
-const CTA: Record<string, string> = { whatsapp: 'WhatsApp', call: 'Call', header_book: 'Header “Book”', hero_book: 'Hero “Book”', footer_book: 'Footer “Book”', mbar_book: 'Mobile bar “Book”', mbar_whatsapp: 'Mobile bar WhatsApp', service_book: 'Service page “Book”', housecalls_book: 'House calls “Book”' };
+const CTA: Record<string, string> = { whatsapp: 'WhatsApp', call: 'Call', message: '“Send a message” button', mbar_message: 'Mobile bar “Message”', message_general: 'Message sent: general', message_booking: 'Message sent: booking', message_member: 'Message sent: member query', header_book: 'Header “Book”', hero_book: 'Hero “Book”', footer_book: 'Footer “Book”', mbar_book: 'Mobile bar “Book”', mbar_whatsapp: 'Mobile bar WhatsApp', service_book: 'Service page “Book”', housecalls_book: 'House calls “Book”' };
 
 export default async function Analytics(props: PageProps<'/admin/analytics'>) {
   const sp = await props.searchParams;

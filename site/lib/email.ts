@@ -1,6 +1,7 @@
 import { q } from './db';
 import type { Booking } from './booking';
-import { practice, waLink, memberships as PLANS, membershipNote } from './content';
+import { practice, waLink, hasWhatsApp, memberships as PLANS, membershipNote, messageTopics } from './content';
+import { ordinal, type Message, type MemberMatch } from './messages';
 import type { Membership } from './membership';
 import { fmtWhen, rands } from './time';
 import { getSetting } from './booking';
@@ -8,7 +9,7 @@ import { getSetting } from './booking';
 const site = () => process.env.NEXT_PUBLIC_SITE_URL ?? practice.url;
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-interface Mail { to: string; subject: string; html: string; attachments?: { filename: string; content: string; content_type?: string }[] }
+interface Mail { to: string; subject: string; html: string; replyTo?: string; attachments?: { filename: string; content: string; content_type?: string }[] }
 
 /** Sends via Resend when RESEND_API_KEY is set. Every message is also kept in the outbox table. */
 export async function send(m: Mail) {
@@ -19,7 +20,7 @@ export async function send(m: Mail) {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: process.env.MAIL_FROM ?? `Dr Nontu Medical Practice <bookings@drnontu.co.za>`, to: [m.to], subject: m.subject, html: m.html, attachments: m.attachments }),
+        body: JSON.stringify({ from: process.env.MAIL_FROM ?? `Dr Nontu Medical Practice <bookings@drnontu.co.za>`, to: [m.to], subject: m.subject, html: m.html, reply_to: m.replyTo, attachments: m.attachments }),
       });
       sent = r.ok; if (!r.ok) error = await r.text();
     } catch (e) { error = String(e); }
@@ -70,7 +71,7 @@ export async function mailConfirmed(b: Booking) {
       `<p style="line-height:1.6">We look forward to seeing you. Here are your details:</p>${details(b)}
        ${b.consult_type === 'virtual' ? '<p style="line-height:1.6">You will receive the video link before your consultation.</p>' : ''}
        <p>${btn(manage(b), 'Manage booking')}</p>
-       <p style="font-size:13px;line-height:1.6;color:#7A5A22">Need to talk to us? <a href="${waLink()}" style="color:#31310F">WhatsApp</a> or call ${practice.phones[0]}.</p>`),
+       <p style="font-size:13px;line-height:1.6;color:#7A5A22">Need to talk to us? Call ${practice.phones[0]}${hasWhatsApp ? `, <a href="${waLink()}" style="color:#31310F">WhatsApp us</a>` : ''} or <a href="${site()}/contact?topic=booking#message" style="color:#31310F">send a message</a>.</p>`),
     attachments: [{ filename: 'appointment.ics', content: Buffer.from(ics(b)).toString('base64'), content_type: 'text/calendar' }],
   });
   const notify = await getSetting<string[]>('notify_emails', practice.emails);
@@ -115,7 +116,7 @@ export async function mailMembershipWelcome(m: Membership) {
   await send({ to: m.email, subject: `Welcome to ${planOf(m).name} membership`,
     html: layout(`Welcome, ${esc(m.name.split(' ')[0])}.`,
       `<p style="line-height:1.6">Your ${planOf(m).name} membership is active. ${rands(m.price_cents)} is charged to your card every month; you can update your card or cancel at any time.</p>${memberDetails(m)}
-       <p style="line-height:1.6">To send a brief, non-urgent medical query, <a href="${waLink('Hi, I am a member and have a brief medical query.')}" style="color:#31310F">WhatsApp us</a> or email ${practice.email}.</p>
+       <p style="line-height:1.6">To send a brief, non-urgent medical query, use the <a href="${site()}/contact?topic=member#message" style="color:#31310F">message form</a>${hasWhatsApp ? `, <a href="${waLink('Hi, I am a member and have a brief medical query.')}" style="color:#31310F">WhatsApp us</a>` : ''} or email ${practice.emails.join(' or ')} from this email address, so that we know it&rsquo;s you.</p>
        <p>${btn(memberLink(m), 'Manage membership')}</p><p style="font-size:12px;color:#7A5A22;line-height:1.6">${esc(membershipNote)} In an emergency, call 112 or 10177.</p>`) });
   const notify = await getSetting<string[]>('notify_emails', practice.emails);
   for (const to of notify) await send({ to, subject: `New ${planOf(m).name} member: ${m.name}`,
@@ -125,4 +126,34 @@ export async function mailMembershipWelcome(m: Membership) {
 export async function mailMembershipCancelled(m: Membership) {
   await send({ to: m.email, subject: `Your ${planOf(m).name} membership is cancelled`,
     html: layout('Membership cancelled', `<p style="line-height:1.6">No further payments will be taken. Thank you for being a member; you are welcome back any time.</p>${memberDetails(m)}<p>${btn(site() + '/care-plans', 'View plans')}</p>`) });
+}
+
+/* ── contact form ── */
+
+const topicLabel = (t: string) => messageTopics.find((x) => x.id === t)?.label ?? t;
+function memberLine(member: MemberMatch | null, topic: string) {
+  if (!member) return topic === 'member' ? 'No active membership found for this email address.' : '';
+  const plan = PLANS.find((p) => p.id === member.plan)!;
+  if (topic !== 'member') return `${plan.name} member.`;
+  return `${plan.name} member · ${ordinal(member.used)} query this month (plan includes ${member.allowance})${member.used > member.allowance ? ' · over allowance' : ''}.`;
+}
+
+/** To the practice: reply goes straight to the patient. */
+export async function mailMessage(msg: Message, member: MemberMatch | null) {
+  const line = memberLine(member, msg.topic);
+  const notify = await getSetting<string[]>('notify_emails', practice.emails);
+  const subject = `${msg.topic === 'member' && member ? 'Member query' : topicLabel(msg.topic)} from ${msg.name}`;
+  for (const to of notify) await send({ to, replyTo: msg.email, subject,
+    html: layout(esc(topicLabel(msg.topic)), `${line ? `<p style="font-size:13px;color:#8C6119;margin:0 0 14px">${esc(line)}</p>` : ''}
+      <p style="font-size:14px;line-height:1.6"><b>${esc(msg.name)}</b><br>${esc(msg.phone)} · ${esc(msg.email)}</p>
+      <div style="border-top:1px solid #EAE1CB;border-bottom:1px solid #EAE1CB;padding:16px 0;margin:16px 0;font-size:15px;line-height:1.65;white-space:pre-wrap">${esc(msg.body)}</div>
+      <p>${btn(`${site()}/admin/messages`, 'Open messages')}</p><p style="font-size:12px;color:#7A5A22">Reply to this email to answer ${esc(msg.name.split(' ')[0])} directly.</p>`) });
+}
+
+/** To the patient: a receipt only (their message is not echoed back). */
+export async function mailMessageReceived(msg: Message) {
+  await send({ to: msg.email, subject: 'We have your message',
+    html: layout(`Thank you, ${esc(msg.name.split(' ')[0].slice(0, 40))}.`,
+      `<p style="line-height:1.6">Your message has reached the practice and we will get back to you by phone or email.</p>
+       <p style="font-size:13px;line-height:1.6;color:#7A5A22">If your symptoms get worse, please call us on ${practice.phones[0]}. In an emergency, call 112 or 10177.</p>`) });
 }

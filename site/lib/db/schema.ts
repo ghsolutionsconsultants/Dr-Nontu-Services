@@ -9,19 +9,6 @@ create table if not exists settings (
   value jsonb not null
 );
 
--- Booking alerts also go to the practice Gmail (only if still the original single address).
-update settings set value = '["info@drnontu.co.za", "drnontumedicalpractice@gmail.com"]'::jsonb
- where key = 'notify_emails' and value = '["info@drnontu.co.za"]'::jsonb;
-
--- The care plans page is now Membership (only if the title was never edited).
-update seo_pages set title = 'Membership | Dr Nontu Medical Practice',
-  description = 'Silver (R149/month) and Gold (R399/month) memberships: brief medical queries, prescription savings and priority access.'
- where path = '/care-plans' and title = 'Care plans | Dr Nontu Medical Practice';
-
--- Repair: some drivers stored settings as a JSON string containing JSON; unwrap those (safe to re-run).
-update settings set value = (value #>> '{}')::jsonb
- where jsonb_typeof(value) = 'string' and (left(value #>> '{}', 1) in ('{', '[') or (value #>> '{}') in ('true', 'false'));
-
 create table if not exists admins (
   id            serial primary key,
   email         text unique not null,
@@ -179,6 +166,22 @@ create index if not exists memberships_email_idx on memberships (email);
 alter table payments alter column booking_id drop not null;
 alter table payments add column if not exists membership_id uuid references memberships(id) on delete cascade;
 
+-- Messages from the website contact form. Members' brief medical queries are linked to their membership.
+create table if not exists messages (
+  id            uuid primary key default gen_random_uuid(),
+  topic         text not null check (topic in ('general','booking','member')),
+  name          text not null,
+  email         text not null,
+  phone         text not null,
+  body          text not null,
+  membership_id uuid references memberships(id) on delete set null,
+  consent_at    timestamptz not null,
+  handled_at    timestamptz,
+  created_at    timestamptz not null default now()
+);
+create index if not exists messages_created_idx on messages (created_at desc);
+create index if not exists messages_email_idx on messages (lower(email), created_at);
+
 create table if not exists analytics_events (
   id            serial primary key,
   ts            timestamptz not null default now(),
@@ -214,4 +217,21 @@ create table if not exists outbox (
   error      text,
   created_at timestamptz not null default now()
 );
+
+-- ── Data updates (after every table exists) ──
+-- Booking alerts also go to the practice Gmail (only if still the original single address).
+update settings set value = '["info@drnontu.co.za", "drnontumedicalpractice@gmail.com"]'::jsonb
+ where key = 'notify_emails' and value = '["info@drnontu.co.za"]'::jsonb;
+
+-- The care plans page is now Membership (only if the title was never edited).
+update seo_pages set title = 'Membership | Dr Nontu Medical Practice',
+  description = 'Silver (R149/month) and Gold (R399/month) memberships: brief medical queries, prescription savings and priority access.'
+ where path = '/care-plans' and title = 'Care plans | Dr Nontu Medical Practice';
+
+-- The contact page description no longer promises WhatsApp (only if never edited).
+update seo_pages set description = 'Practices in Esther Park (Kempton Park) and Fourways. Call, send a message or book online.'
+ where path = '/contact' and description = 'Practices in Esther Park (Kempton Park) and Fourways. Call, WhatsApp or book online.';
+-- Repair: some drivers stored settings as a JSON string containing JSON; unwrap those (safe to re-run).
+update settings set value = (value #>> '{}')::jsonb
+ where jsonb_typeof(value) = 'string' and (left(value #>> '{}', 1) in ('{', '[') or (value #>> '{}') in ('true', 'false'));
 `;

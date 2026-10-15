@@ -2,8 +2,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { waLink } from '@/lib/content';
-import { WhatsAppIcon } from './Icon';
+import { hasWhatsApp } from '@/lib/content';
+import { MessageButton } from './MessageButton';
 
 export function MobileBar() {
   const [show, setShow] = useState(false);
@@ -17,7 +17,7 @@ export function MobileBar() {
   return (
     <div className={`mbar${show ? ' show' : ''}`}>
       <Link className="btn btn--light" href="/book" data-track="mbar_book">Book</Link>
-      <a className="btn btn--on-dark" href={waLink()} data-track="mbar_whatsapp"><WhatsAppIcon /> WhatsApp</a>
+      <MessageButton className="btn btn--on-dark" short track={hasWhatsApp ? 'mbar_whatsapp' : 'mbar_message'} />
     </div>
   );
 }

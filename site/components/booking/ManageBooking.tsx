@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DateTimePicker } from './DateTimePicker';
-import { Icon, WhatsAppIcon } from '../site/Icon';
+import { Icon } from '../site/Icon';
+import { MessageButton } from '../site/MessageButton';
 
 interface B { ref: string; name: string; status: string; payment_status: string; payment_choice: string; start: string; duration: number; price: number; type: string; type_name: string; location: string; where: string }
 
 const fmt = new Intl.DateTimeFormat('en-ZA', { timeZone: 'Africa/Johannesburg', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: false });
 const rands = (c: number) => 'R' + Math.floor(c / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const STATUS: Record<string, string> = { pending_payment: 'Awaiting payment', confirmed: 'Confirmed', completed: 'Completed', cancelled: 'Cancelled', no_show: 'Missed', expired: 'Expired: payment not received' };
-const WA = process.env.NEXT_PUBLIC_WHATSAPP ?? '27820503345';
 
 export function ManageBooking({ token, booking: b, paymentFailed, cutoffHours, locked }: { token: string; booking: B; paymentFailed?: boolean; cutoffHours: number; locked: boolean }) {
   const router = useRouter();
@@ -51,7 +51,7 @@ export function ManageBooking({ token, booking: b, paymentFailed, cutoffHours, l
             {canPay && <button className="btn" disabled={busy} onClick={pay}>Pay {rands(b.price)} now <Icon name="arrow" /></button>}
             {live && !locked && <button className="btn btn--ghost" onClick={() => setMode('move')}>Change date or time</button>}
             {live && !locked && <button className="btn btn--ghost" onClick={() => setMode('cancel')}>Cancel booking</button>}
-            <a className="btn btn--ghost" href={`https://wa.me/${WA}?text=${encodeURIComponent('Hi, about my booking ' + b.ref)}`}><WhatsAppIcon /> WhatsApp us</a>
+            <MessageButton text={'Hi, about my booking ' + b.ref} topic="booking" />
           </div>
         )}
         {live && locked && mode === 'view' && <p className="muted" style={{ marginTop: 18 }}>Your visit is less than {cutoffHours} hours away, so changes are made with us directly. Please WhatsApp or call.</p>}

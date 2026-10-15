@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { bookingByToken } from '@/lib/booking';
 import { fmtWhen, rands } from '@/lib/time';
-import { practice, waLink } from '@/lib/content';
-import { Icon, WhatsAppIcon } from '@/components/site/Icon';
+import { practice } from '@/lib/content';
+import { Icon } from '@/components/site/Icon';
+import { MessageButton } from '@/components/site/MessageButton';
 
 export const metadata = { title: 'Booking confirmed', robots: { index: false } };
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,7 @@ export default async function Confirmed(props: PageProps<'/book/confirmed'>) {
           <p className="lede" style={{ marginTop: 20 }}>We&rsquo;ve emailed your confirmation to {b.patient_email}, with a calendar invite and a link to manage your booking.</p>
           <div className="ctas">
             <Link className="btn" href={`/manage/${b.manage_token}`}>Manage booking <Icon name="arrow" /></Link>
-            <a className="btn btn--ghost" href={waLink(`Hi, about my booking ${b.ref}`)}><WhatsAppIcon /> WhatsApp us</a>
+            <MessageButton text={`Hi, about my booking ${b.ref}`} topic="booking" />
           </div>
         </div>
         <aside className="c9-12">
