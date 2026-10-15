@@ -15,15 +15,15 @@ const VALUES = [
 export default function About() {
   return (
     <>
-      <PageHero eyebrow="About the practice" title={<>Healthcare that feels <em>personal.</em></>} photo={photos.handsHold} photoAlt="Two hands resting together on a table" scene="mark"
+      <PageHero eyebrow="About the practice" title={<>Healthcare that feels <em>personal.</em></>} photo={photos.handsHold} photoAlt="Two hands resting together on a table"
         lede="Meet Dr Nontu: a warm, kind and compassionate doctor who believes that every patient matters." />
 
       <section className="section section--rule">
         <div className="wrap g12">
           <div className="c1-4">
-            <div className="ph arch mask-in" data-tilt="8" style={{ aspectRatio: '3/4' }}>
+            <div className="ph arch rv" style={{ aspectRatio: '3/4' }}>
               
-              <img src={img(photos.stethTable, 800)} alt="A stethoscope resting on a desk" loading="lazy" data-par=".08" />
+              <img src={img(photos.stethTable, 800)} alt="A stethoscope resting on a desk" loading="lazy" />
             </div>
           </div>
           <div className="c5-12 prose rv">

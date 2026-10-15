@@ -9,6 +9,15 @@ create table if not exists settings (
   value jsonb not null
 );
 
+-- Booking alerts also go to the practice Gmail (only if still the original single address).
+update settings set value = '["info@drnontu.co.za", "drnontumedicalpractice@gmail.com"]'::jsonb
+ where key = 'notify_emails' and value = '["info@drnontu.co.za"]'::jsonb;
+
+-- The care plans page is now Membership (only if the title was never edited).
+update seo_pages set title = 'Membership | Dr Nontu Medical Practice',
+  description = 'Silver (R149/month) and Gold (R399/month) memberships: brief medical queries, prescription savings and priority access.'
+ where path = '/care-plans' and title = 'Care plans | Dr Nontu Medical Practice';
+
 -- Repair: some drivers stored settings as a JSON string containing JSON; unwrap those (safe to re-run).
 update settings set value = (value #>> '{}')::jsonb
  where jsonb_typeof(value) = 'string' and (left(value #>> '{}', 1) in ('{', '[') or (value #>> '{}') in ('true', 'false'));
@@ -143,6 +152,32 @@ create table if not exists payments (
   created_at    timestamptz not null default now()
 );
 create index if not exists payments_booking_idx on payments (booking_id);
+
+-- Membership (Silver / Gold), billed monthly through Paystack subscriptions.
+create table if not exists memberships (
+  id                    uuid primary key default gen_random_uuid(),
+  plan                  text not null check (plan in ('silver','gold')),
+  price_cents           int  not null,
+  name                  text not null,
+  email                 text not null,
+  phone                 text not null,
+  status                text not null default 'pending' check (status in ('pending','active','non_renewing','past_due','cancelled')),
+  provider              text not null default 'mock',
+  paystack_customer     text,
+  paystack_subscription text,
+  paystack_email_token  text,
+  manage_token          text unique not null,
+  consent_at            timestamptz not null,
+  started_at            timestamptz,
+  next_payment_at       timestamptz,
+  cancelled_at          timestamptz,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+create index if not exists memberships_email_idx on memberships (email);
+-- payments belong to a booking or to a membership
+alter table payments alter column booking_id drop not null;
+alter table payments add column if not exists membership_id uuid references memberships(id) on delete cascade;
 
 create table if not exists analytics_events (
   id            serial primary key,

@@ -15,7 +15,7 @@ export default async function Fees() {
   const { types } = await getCatalog();
   return (
     <>
-      <PageHero eyebrow="Fees & medical aid" title={<>Clear fees, <em>chosen by you.</em></>} photo={photos.bp} photoAlt="A blood pressure check" shape="arch" scene="calendar"
+      <PageHero eyebrow="Fees & medical aid" title={<>Clear fees, <em>chosen by you.</em></>} photo={photos.bp} photoAlt="A blood pressure check" shape="arch"
         lede="You choose how long you need. Each length has a set fee, shown before you confirm. Pay online now, or at your visit." />
       <section className="section section--rule">
         <div className="wrap g12">

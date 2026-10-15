@@ -10,7 +10,7 @@ export const seoDefaults: Record<string, [string, string]> = {
   '/about': ['About Dr Nontu | Dr Nontu Medical Practice', 'Meet Dr Nontuthuko Ndlovu, a GP in primary and emergency care who listens first and explains clearly.'],
   '/services': ['Services | Dr Nontu Medical Practice', 'Consultations, house calls, virtual care, chronic care, women’s health, family care, minor procedures and referrals.'],
   '/house-calls': ['House calls | Dr Nontu Medical Practice', 'A GP who comes to you. House calls daily from 09:00 to 16:00 around Kempton Park and Fourways.'],
-  '/care-plans': ['Care plans | Dr Nontu Medical Practice', 'Silver and Gold care plans: simpler, more affordable ongoing healthcare.'],
+  '/care-plans': ['Membership | Dr Nontu Medical Practice', 'Silver (R149/month) and Gold (R399/month) memberships: brief medical queries, prescription savings and priority access.'],
   '/fees': ['Fees & medical aid | Dr Nontu Medical Practice', 'Consultation fees by type and length, payment options and medical aid information.'],
   '/contact': ['Locations & contact | Dr Nontu Medical Practice', 'Practices in Esther Park (Kempton Park) and Fourways. Call, WhatsApp or book online.'],
   '/faq': ['FAQ | Dr Nontu Medical Practice', 'Appointments, walk-ins, medical aid, house calls, virtual consultations and payments.'],
@@ -24,8 +24,8 @@ export async function seed(q: Query) {
 
   {
     const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2::text::jsonb) on conflict (key) do nothing`, [k, JSON.stringify(v)]);
-    await set('practice', { phone: practice.phones[0], phone2: practice.phones[1], email: practice.email, whatsapp: practice.whatsapp });
-    await set('notify_emails', [practice.email]);
+    await set('practice', { phone: practice.phones[0], email: practice.email, whatsapp: practice.whatsapp });
+    await set('notify_emails', practice.emails);
     await set('booking', { cancelCutoffHours: 24, leadMinutes: 120, holdMinutes: 15, slotStepMinutes: 15, maxDaysAhead: 60 });
     await set('house_call_areas', []); // empty = accept any address, practice confirms
     await set('fees_are_placeholder', true);

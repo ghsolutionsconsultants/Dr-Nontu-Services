@@ -1,8 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { img, photos } from '@/lib/content';
-import { Scene3D } from '../three/Scene3D';
-import { LogoMark } from './Icon';
 
 const LINES: [string, string][] = [['A laugh', 'when you need one.'], ['Answers', 'when you need them.'], ['Hope', 'on difficult days.']];
 const ART = [
@@ -19,12 +17,12 @@ export function Hero({ children }: { children: React.ReactNode }) {
   const [active, setActive] = useState(-1);
   const [reveal, setReveal] = useState(0);
   const hovering = useRef(false);
-  const pathRef = useRef<SVGPathElement>(null), dotRef = useRef<HTMLSpanElement>(null), depthRef = useRef<HTMLDivElement>(null);
+  const pathRef = useRef<SVGPathElement>(null), dotRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    let cycle: ReturnType<typeof setInterval>, raf = 0, raf2 = 0;
+    let cycle: ReturnType<typeof setInterval>, raf = 0;
     const T = (f: () => void, ms: number) => timers.push(setTimeout(f, ms));
     const start = () => {
       setGo(true);
@@ -33,25 +31,16 @@ export function Hero({ children }: { children: React.ReactNode }) {
       T(() => {
         const p = pathRef.current!, dot = dotRef.current!, L = p.getTotalLength(), t0 = performance.now();
         dot.classList.add('live');
-        const tick = (now: number) => { const pt = p.getPointAtLength((((now - t0) / 5200) % 1) * L); dot.style.left = pt.x / 14.4 + '%'; dot.style.top = pt.y / 1.6 + '%'; raf = requestAnimationFrame(tick); };
+        const tick = (now: number) => { const pt = p.getPointAtLength((((now - t0) / 9000) % 1) * L); dot.style.left = pt.x / 14.4 + '%'; dot.style.top = pt.y / 1.6 + '%'; raf = requestAnimationFrame(tick); };
         raf = requestAnimationFrame(tick);
       }, 500 + 3 * 1100);
-      T(() => { setActive(0); cycle = setInterval(() => { if (!hovering.current) setActive((a) => (a + 1) % 3); }, 4200); }, 500 + 3 * 1100 + 2600);
+      T(() => { setActive(0); cycle = setInterval(() => { if (!hovering.current) setActive((a) => (a + 1) % 3); }, 7000); }, 500 + 3 * 1100 + 2600);
     };
     // the hero's own entrance begins as the site intro's curtain lifts
     const introRunning = document.documentElement.classList.contains('intro-running') && !(window as unknown as { __dnIntroDone?: boolean }).__dnIntroDone;
     const onDone = () => T(start, 0);
     if (introRunning) addEventListener('dn:intro-done', onDone, { once: true }); else T(start, 0);
 
-    // depth parallax on the visual + headline
-    if (!reduce && matchMedia('(hover:hover) and (pointer:fine)').matches) {
-      let hx = 0, hy = 0, tx = 0, ty = 0;
-      const mv = (e: PointerEvent) => { tx = e.clientX / innerWidth - .5; ty = e.clientY / innerHeight - .5; };
-      addEventListener('pointermove', mv, { passive: true });
-      const loop = () => { hx += (tx - hx) * .06; hy += (ty - hy) * .06; if (depthRef.current) depthRef.current.style.transform = `rotateY(${hx * 12}deg) rotateX(${-hy * 10}deg)`; raf2 = requestAnimationFrame(loop); };
-      loop();
-      return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); cancelAnimationFrame(raf2); removeEventListener('pointermove', mv); removeEventListener('dn:intro-done', onDone); };
-    }
     return () => { timers.forEach(clearTimeout); clearInterval(cycle); cancelAnimationFrame(raf); removeEventListener('dn:intro-done', onDone); };
   }, []);
 
@@ -70,30 +59,21 @@ export function Hero({ children }: { children: React.ReactNode }) {
             </h1>
           </div>
           <div className={`hero-visual rv${go ? ' in' : ''}`} style={{ transitionDelay: '.3s' }}>
-            <div className="hero-depth" ref={depthRef}>
-              <div className="hero-arch ph arch" data-tilt="6">
+            <div className="hero-depth">
+              <div className="hero-arch ph arch">
                 {ART.map((a, i) => (
                   <img key={a.id} className={active === i || (active < 0 && i === 0) ? 'on' : ''} src={img(a.id, 900)} alt={a.alt} fetchPriority={i === 0 ? 'high' : 'low'} />
                 ))}
               </div>
-              <Scene3D kind="mark" className="hero-3d" delay={500} />
-              <svg className="badge" viewBox="0 0 120 120" aria-hidden>
-                <g className="ring">
-                  <path id="circ" d="M60 60 m-46 0 a46 46 0 1 1 92 0 a46 46 0 1 1 -92 0" fill="none" />
-                  <text><textPath href="#circ">Every patient · Expertly cared for · </textPath></text>
-                </g>
-                <circle cx="60" cy="60" r="30" fill="#FDFAF5" />
-                <svg x="40" y="40" width="40" height="40" viewBox="0 0 120 120"><LogoMark /></svg>
-              </svg>
             </div>
           </div>
         </div>
-        <div className="ecg" aria-hidden>
+        {children}
+        <div className="ecg hero-ecg" aria-hidden>
           <svg className="ghost" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 110 H1440" /></svg>
           <svg className="trace" viewBox="0 0 1440 160" preserveAspectRatio="none" style={{ '--reveal': reveal } as React.CSSProperties}><path ref={pathRef} d={PATH} /></svg>
           <span className="pulse" ref={dotRef} />
         </div>
-        <div className={go ? 'hero-reveal-go' : ''}>{children}</div>
       </div>
     </section>
   );

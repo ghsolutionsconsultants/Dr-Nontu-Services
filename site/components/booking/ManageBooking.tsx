@@ -48,7 +48,7 @@ export function ManageBooking({ token, booking: b, paymentFailed, cutoffHours, l
 
         {mode === 'view' && (
           <div className="ctas">
-            {canPay && <button className="btn magnetic" disabled={busy} onClick={pay}>Pay {rands(b.price)} now <Icon name="arrow" /></button>}
+            {canPay && <button className="btn" disabled={busy} onClick={pay}>Pay {rands(b.price)} now <Icon name="arrow" /></button>}
             {live && !locked && <button className="btn btn--ghost" onClick={() => setMode('move')}>Change date or time</button>}
             {live && !locked && <button className="btn btn--ghost" onClick={() => setMode('cancel')}>Cancel booking</button>}
             <a className="btn btn--ghost" href={`https://wa.me/${WA}?text=${encodeURIComponent('Hi, about my booking ' + b.ref)}`}><WhatsAppIcon /> WhatsApp us</a>

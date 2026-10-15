@@ -27,6 +27,7 @@ export const legal: Record<'privacy' | 'popia' | 'terms', { title: string; body:
     <h2>Cancellations and changes</h2><p>You can cancel or move a booking online up to 24 hours before it starts, using the link in your confirmation email. After that, please WhatsApp or call us. Refunds for cancelled prepaid bookings go back to the original payment method.</p>
     <h2>Virtual consultations</h2><p>Virtual consultations are paid when booked. Not every condition can be assessed remotely; Dr Nontu may recommend an in-person visit.</p>
     <h2>House calls</h2><p>House calls are subject to availability and service area. We will contact you if your address is outside our area.</p>
+    <h2>Membership</h2><p>Silver and Gold memberships are billed monthly to your card through Paystack until you cancel. You can update your card or cancel at any time from your membership page; cancelling stops future payments. Brief medical queries are for non-urgent questions and are answered within practice hours. Membership benefits are for non-urgent healthcare support and continuity of care and do not replace a consultation when one is needed.</p>
     <h2>Emergencies</h2><p>This website is not for emergencies. In an emergency, call 112 from a cellphone or 10177, or go to your nearest emergency unit.</p>
   </>) },
 };

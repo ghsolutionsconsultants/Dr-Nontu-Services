@@ -1,14 +1,9 @@
 // Server-rendered building blocks shared by the home page and inner pages.
 import Link from 'next/link';
-import { img, photos, locations, practice, waLink } from '@/lib/content';
+import { img, photos, locations, practice, waLink, memberships, membershipNote } from '@/lib/content';
 import { Scene3D } from '../three/Scene3D';
 import { Icon, WhatsAppIcon } from './Icon';
-
-export function Marquee() {
-  const beat = <svg viewBox="0 0 56 22"><path d="M0 11h18l3-7 4 14 3-7h28" fill="none" stroke="#E8C988" strokeWidth="1.5" /></svg>;
-  const row = <span>In-person consultations {beat} House calls, <i>daily</i> {beat} Virtual care, <i>any hour</i> {beat} Esther Park {beat} Fourways {beat}</span>;
-  return <div className="marquee" aria-hidden><div className="marquee-track">{row}{row}</div></div>;
-}
+import { rands } from '@/lib/time';
 
 export function SecHead({ eyebrow, title, aside, as: H = 'h2' }: { eyebrow: string; title: React.ReactNode; aside?: React.ReactNode; as?: 'h1' | 'h2' }) {
   return (
@@ -19,9 +14,9 @@ export function SecHead({ eyebrow, title, aside, as: H = 'h2' }: { eyebrow: stri
   );
 }
 
-export function PageHero({ eyebrow, title, lede, photo, photoAlt, shape = 'arch', scene, crumbs, children }: {
+export function PageHero({ eyebrow, title, lede, photo, photoAlt, shape = 'arch', crumbs, children }: {
   eyebrow: string; title: React.ReactNode; lede?: React.ReactNode; photo?: string; photoAlt?: string; shape?: 'arch' | 'pill' | 'soft' | 'round';
-  scene?: React.ComponentProps<typeof Scene3D>['kind']; crumbs?: { href: string; label: string }[]; children?: React.ReactNode;
+  crumbs?: { href: string; label: string }[]; children?: React.ReactNode;
 }) {
   return (
     <section className="page-hero page-fade">
@@ -33,61 +28,73 @@ export function PageHero({ eyebrow, title, lede, photo, photoAlt, shape = 'arch'
           {lede && <p className="lede">{lede}</p>}
           {children}
         </div>
-        {photo && (
-          <div className="page-hero-visual rv">
-            
-            <div className={`ph ${shape}`} data-tilt="6"><img src={img(photo, 900)} alt={photoAlt ?? ''} data-par=".08" /></div>
-            {scene && <Scene3D kind={scene} className="page-hero-3d" />}
-          </div>
-        )}
+        {photo && <div className="page-hero-visual rv"><div className={`ph ${shape}`}><img src={img(photo, 900)} alt={photoAlt ?? ''} /></div></div>}
       </div>
     </section>
   );
 }
 
+/** How to consult: the three ways, each with its own hours. Shown once, on the home page. */
+export const WAYS = [
+  { id: 'in_person', icon: 'clinic', tag: 'In person', photo: photos.hallway, alt: 'A calm hallway with botanical prints', h: 'At the practice',
+    hours: [['Monday – Friday', '09:00 – 16:00']], p: 'A private, face-to-face consultation in Esther Park or Fourways.', cta: 'Book in person' },
+  { id: 'house_call', icon: 'house', tag: 'House call', photo: photos.door, alt: 'A green front door framed by climbing plants', h: 'At your home',
+    hours: [['Every day', '09:00 – 16:00']], p: 'Medical care in the comfort of your home, subject to availability and service area.', cta: 'Book a house call' },
+  { id: 'virtual', icon: 'screen', tag: 'Virtual', photo: photos.laptop, alt: 'A laptop on a desk beside houseplants', h: 'Wherever you are',
+    hours: [['Every day', 'Available 24/7']], p: 'Consult by video, day or night. Ideal for follow-ups, scripts and quick questions.', cta: 'Book a virtual consult' },
+] as const;
+
 export function Ways() {
-  const ways = [
-    { tag: 'In person', icon: 'clinic', scene: 'chestpiece' as const, photo: photos.hallway, alt: 'A calm hallway with botanical prints', shape: 'arch', h: 'At the practice', hrs: 'Mon–Fri · 09:00–16:00', p: 'A private, face-to-face consultation in Esther Park or Fourways.', cta: 'Book in person', href: '/book?type=in_person' },
-    { tag: 'House call', icon: 'house', scene: 'house' as const, photo: photos.door, alt: 'A green front door framed by climbing plants', shape: 'pill', h: 'At your home', hrs: 'Daily · 09:00–16:00', p: 'Professional medical care in the comfort of your home, subject to availability and service area.', cta: 'Book a house call', href: '/book?type=house_call' },
-    { tag: 'Virtual', icon: 'screen', scene: 'phone' as const, photo: photos.laptop, alt: 'A laptop on a desk beside houseplants', shape: 'soft', h: 'Wherever you are', hrs: 'Any time · 24/7', p: 'Consult remotely by video, day or night. Ideal for follow-ups, scripts and quick questions.', cta: 'Book a virtual consult', href: '/book?type=virtual' },
-  ];
   return (
     <div className="ways-grid">
-      {ways.map((w) => (
-        <article className="way rv" key={w.tag}>
-          <Scene3D kind={w.scene} className="way-3d" />
-          <div className={`ph ${w.shape}`} data-tilt="8">
+      {WAYS.map((w) => (
+        <article className="way rv" key={w.id}>
+          <div className="ph soft"><img src={img(w.photo, 900)} alt={w.alt} loading="lazy" /></div>
+          <div className="way-body">
             <span className="way-tag"><Icon name={w.icon} />{w.tag}</span>
-            
-            <img data-par=".12" src={img(w.photo, 900)} alt={w.alt} loading="lazy" />
+            <h3>{w.h}</h3>
+            <p className="muted">{w.p}</p>
+            <dl className="way-hours">{w.hours.map(([d, t]) => <div key={d}><dt>{d}</dt><dd className="tnum">{t}</dd></div>)}</dl>
+            <Link className="link-u" href={`/book?type=${w.id}`}>{w.cta} →</Link>
           </div>
-          <div className="way-meta"><h3>{w.h}</h3><span className="hrs tnum">{w.hrs}</span></div>
-          <p className="muted">{w.p}</p>
-          <Link className="link-u" href={w.href}>{w.cta} →</Link>
         </article>
       ))}
     </div>
   );
 }
 
+/** Membership: Silver and Gold with subscribe buttons; the capsules are a small still picture. */
 export function PlansBlock({ heading = 'h2' }: { heading?: 'h1' | 'h2' }) {
   const H = heading;
   return (
-    <div className="plans-grid">
-      <div>
-        <span className="eyebrow">Care plans</span>
-        <H className="display">Healthcare, <em>made simpler.</em></H>
-        <p className="lede">One monthly plan covers your check&#8209;ins, follow&#8209;ups and quick questions, so you never hesitate to reach out.</p>
-        <div className="plan-cards">
-          <div className="plan rv" data-tilt="10"><h3><i className="dot-silver" />Silver</h3><p className="muted">Essential cover for everyday care and online questions.</p><span className="soon">Benefits &amp; price soon</span></div>
-          <div className="plan rv" data-tilt="10" style={{ transitionDelay: '.12s' }}><h3><i className="dot-gold" />Gold</h3><p className="muted">Fuller cover, including house calls and chronic care.</p><span className="soon">Benefits &amp; price soon</span></div>
+    <div className="plans-wrap">
+      <div className="plans-head">
+        <div>
+          <span className="eyebrow">Membership</span>
+          <H className="display">Not sure if you need a consultation? <em>Ask first.</em></H>
+          <p className="lede">That&rsquo;s exactly what your brief medical queries are for. Simple access. Practical support. Ongoing care.</p>
         </div>
+        <Scene3D kind="capsules" className="plans-3d" still />
       </div>
-      <Scene3D kind="capsules" className="plans-3d" />
+      <div className="plan-cards">
+        {memberships.map((m) => (
+          <article key={m.id} className={`plan plan--${m.id} rv`}>
+            <header>
+              <h3><i className={`dot-${m.id}`} />{m.name}</h3>
+              <span className="plan-label">{m.label}</span>
+            </header>
+            <p className="plan-price"><b className="tnum">{rands(m.priceCents)}</b> / month</p>
+            <ul>{m.benefits.map((b) => <li key={b}>{b}</li>)}</ul>
+            <Link className={`btn${m.id === 'gold' ? '' : ' btn--ghost'}`} href={`/care-plans/subscribe?plan=${m.id}`} data-track={`subscribe_${m.id}`}>Subscribe to {m.name} <Icon name="arrow" /></Link>
+          </article>
+        ))}
+      </div>
+      <p className="plan-note muted">{membershipNote}</p>
     </div>
   );
 }
 
+/** Two locations with a quiet, static map between them. */
 export function LocationsBlock() {
   const [a, b] = locations;
   return (
@@ -97,8 +104,13 @@ export function LocationsBlock() {
         <address>{a.address.map((l) => <span key={l}>{l}<br /></span>)}</address>
         <a className="link-u" href={a.map} target="_blank" rel="noopener">Get directions →</a>
       </div>
-      <Scene3D kind="map" className="map-3d" />
-      <div className="loc rv" style={{ transitionDelay: '.15s' }}>
+      <svg className="map-static" viewBox="0 0 400 300" role="img" aria-label="Esther Park in Kempton Park and Fourways, north of Johannesburg">
+        <path className="road" d="M0 70 C120 80 260 50 400 60M0 190 C140 170 240 220 400 200M60 0 C80 110 50 220 90 300M300 0 C280 100 330 210 300 300M170 0 C190 130 160 210 200 300" />
+        <path className="route" d="M92 214 C150 170 190 150 230 132 S300 96 318 84" />
+        <circle className="pin" cx="318" cy="84" r="7" /><circle className="pin" cx="92" cy="214" r="7" />
+        <text x="306" y="60" textAnchor="end">Esther Park</text><text x="106" y="246">Fourways</text>
+      </svg>
+      <div className="loc rv">
         <span className="eyebrow">{b.region}</span><h3>{b.name}</h3>
         <address>{b.address.map((l) => <span key={l}>{l}<br /></span>)}</address>
         <a className="link-u" href={b.map} target="_blank" rel="noopener">Get directions →</a>
@@ -112,8 +124,8 @@ export function CtaBand({ title = <>Ready when <em>you are.</em></> }: { title?:
     <div className="cta-band rv">
       <h2 className="display">{title}</h2>
       <div className="ctas" style={{ marginTop: 0 }}>
-        <Link className="btn btn--light magnetic" href="/book">Book an appointment <Icon name="arrow" /></Link>
-        <a className="btn btn--on-dark magnetic" href={waLink()}><WhatsAppIcon /> WhatsApp us</a>
+        <Link className="btn btn--light" href="/book">Book an appointment <Icon name="arrow" /></Link>
+        <a className="btn btn--on-dark" href={waLink()}><WhatsAppIcon /> WhatsApp us</a>
       </div>
     </div>
   );

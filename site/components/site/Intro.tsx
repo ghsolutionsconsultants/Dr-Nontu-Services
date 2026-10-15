@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { img, photos } from '@/lib/content';
 
 /**
- * The entrance: about five seconds, once per visit. The logo draws itself, the name rises letter by letter,
- * and a heartbeat traces the loading line while the page's photographs and 3D engine are fetched behind it.
+ * The entrance: about five seconds, once per visit. The practice's logo is revealed on its own warm ground,
+ * and a heartbeat traces the loading line while the first screen's photographs are fetched behind it.
  * Whether it shows is decided before first paint by the inline script in the site layout (no flash).
  */
 const LOAD_MS = 4200;   // logo, name and the loading heartbeat
@@ -36,7 +36,6 @@ export function Intro() {
 
     // use the wait: fetch what the first screen needs
     [photos.tea, photos.handsSteth, photos.oliveLight].forEach((id) => { const i = new Image(); i.src = img(id, 900); });
-    import('../three/engine').catch(() => {});
 
     const finish = () => {
       if (done.current) return;
@@ -75,19 +74,7 @@ export function Intro() {
   return (
     <div className={`intro${phase === 'exit' ? ' done' : ''}`} role="status" aria-label="Loading Dr Nontu Medical Practice">
       <div className="intro-inner">
-        <svg className="intro-mark" viewBox="0 0 120 120" aria-hidden>
-          <path className="tube t1" pathLength={1} d="M38 21.9 A44 44 0 1 0 82 98.1" />
-          <path className="tube t2" pathLength={1} d="M60 16 A44 44 0 0 1 98.1 82" />
-          <path className="ears" pathLength={1} d="M14 34 C14 52 18 62 28 64 M42 34 C42 52 38 62 28 64" />
-          <circle className="tip" cx="14" cy="32" r="3.4" /><circle className="tip" cx="42" cy="32" r="3.4" />
-          <path className="beat" pathLength={1} d="M28 64 H44 L49 52 L54 74 L59 36 L64 82 L68 56 L71 62 H104" />
-          <circle className="chest" cx="91" cy="91" r="10" />
-          <circle className="chest-ring" cx="91" cy="91" r="5.5" />
-        </svg>
-        <div className="intro-word" aria-hidden>
-          {'DR NONTU'.split('').map((c, i) => <span key={i} style={{ animationDelay: `${2 + i * .07}s` }}>{c === ' ' ? ' ' : c}</span>)}
-        </div>
-        <div className="intro-sub" aria-hidden>MEDICAL PRACTICE</div>
+        <img className="intro-logo" src="/brand/logo.webp" alt="Dr Nontu Medical Practice" width={1167} height={369} />
         <p className="intro-tag">Every patient. <em>Expertly cared for.</em></p>
       </div>
       <div className="intro-foot" aria-hidden>

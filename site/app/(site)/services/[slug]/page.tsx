@@ -6,7 +6,6 @@ import { img, services } from '@/lib/content';
 import { pageMeta } from '@/lib/seo';
 
 const MODE: Record<string, [string, string, string]> = { clinic: ['clinic', 'In person', 'in_person'], house: ['house', 'House call', 'house_call'], screen: ['screen', 'Virtual', 'virtual'] };
-const SCENE = { clinic: 'chestpiece', house: 'house', screen: 'phone' } as const;
 
 export function generateStaticParams() { return services.map((s) => ({ slug: s.slug })); }
 
@@ -23,7 +22,7 @@ export default async function Service(props: PageProps<'/services/[slug]'>) {
   const i = services.indexOf(s), next = services[(i + 1) % services.length];
   return (
     <>
-      <PageHero eyebrow="Service" title={s.name} lede={s.summary} photo={s.image} photoAlt="" scene={SCENE[s.modes[0]]}
+      <PageHero eyebrow="Service" title={s.name} lede={s.summary} photo={s.image} photoAlt=""
         crumbs={[{ href: '/services', label: 'Services' }]}>
         <div className="svc-detail-modes">{s.modes.map((m) => <span className="mode-pill" key={m}><Icon name={MODE[m][0]} />{MODE[m][1]}</span>)}</div>
       </PageHero>

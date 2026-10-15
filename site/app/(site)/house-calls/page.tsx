@@ -15,9 +15,9 @@ export default async function HouseCalls() {
   const hc = types.find((t) => t.id === 'house_call');
   return (
     <>
-      <PageHero eyebrow="House calls" title={<>Healthcare, <em>wherever you are.</em></>} photo={photos.door} photoAlt="A green front door framed by climbing plants" shape="pill" scene="house"
+      <PageHero eyebrow="House calls" title={<>Healthcare, <em>wherever you are.</em></>} photo={photos.door} photoAlt="A green front door framed by climbing plants" shape="pill"
         lede="When getting to the practice is hard, Dr Nontu comes to you. House calls are available daily from 09:00 to 16:00, subject to availability and service area.">
-        <div className="ctas"><Link className="btn magnetic" href="/book?type=house_call" data-track="housecalls_book">Book a house call <Icon name="arrow" /></Link></div>
+        <div className="ctas"><Link className="btn" href="/book?type=house_call" data-track="housecalls_book">Book a house call <Icon name="arrow" /></Link></div>
       </PageHero>
       <section className="section section--rule">
         <div className="wrap">
@@ -46,7 +46,7 @@ export default async function HouseCalls() {
               </table>
             )}
             <p className="muted" style={{ fontSize: '.9rem' }}>Includes travel within our service area. Pay online when you book, or at the visit.</p>
-            <div className="ph soft mask-in" style={{ aspectRatio: '16/10', marginTop: 24 }} data-tilt="6">
+            <div className="ph soft rv" style={{ aspectRatio: '16/10', marginTop: 24 }}>
               
               <img src={img(photos.armchairs, 900)} alt="Two cream armchairs beside a plant" loading="lazy" />
             </div>

@@ -1,5 +1,4 @@
 import { loginAction } from '../actions';
-import { LogoMark } from '@/components/site/Icon';
 
 export const metadata = { title: 'Sign in' };
 
@@ -8,10 +7,8 @@ export default async function Login(props: PageProps<'/admin/login'>) {
   return (
     <div className="login">
       <form action={loginAction} className="card frm">
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 6 }}>
-          <LogoMark className="" />
-          <div><b style={{ fontFamily: 'var(--display)', letterSpacing: '.12em', fontWeight: 500 }}>DR NONTU</b><br /><small style={{ fontSize: '.62rem', letterSpacing: '.3em', color: 'var(--brass-deep)', fontWeight: 600 }}>PRACTICE ADMIN</small></div>
-        </div>
+        <img src="/brand/logo.webp" alt="Dr Nontu Medical Practice" width={1167} height={369} style={{ width: 220, height: 'auto', margin: '0 auto 4px' }} />
+        <p className="muted" style={{ textAlign: 'center', margin: '0 0 6px', fontSize: '.78rem', letterSpacing: '.2em', textTransform: 'uppercase' }}>Practice admin</p>
         {sp.err && <div className="flash flash--warn">That email and password don&rsquo;t match. Please try again.</div>}
         <input type="hidden" name="next" value={typeof sp.next === 'string' ? sp.next : ''} />
         <label>Email<input className="inp" name="email" type="email" autoComplete="username" required /></label>

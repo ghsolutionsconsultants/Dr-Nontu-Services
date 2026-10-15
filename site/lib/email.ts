@@ -1,6 +1,7 @@
 import { q } from './db';
 import type { Booking } from './booking';
-import { practice, waLink } from './content';
+import { practice, waLink, memberships as PLANS, membershipNote } from './content';
+import type { Membership } from './membership';
 import { fmtWhen, rands } from './time';
 import { getSetting } from './booking';
 
@@ -38,7 +39,7 @@ function layout(title: string, body: string) {
   <tr><td style="padding:32px">
     <h1 style="font-family:Georgia,serif;font-weight:400;font-size:26px;margin:0 0 16px">${title}</h1>${body}</td></tr>
   <tr><td style="padding:20px 32px;border-top:1px solid #EAE1CB;font-size:12px;color:#7A5A22">
-    ${practice.name} · Practice No. ${practice.practiceNo}<br>${practice.phones.join(' · ')} · ${practice.email}</td></tr>
+    ${practice.name} · Practice No. ${practice.practiceNo}<br>${practice.phones.join(' · ')} · ${practice.emails.join(' · ')}</td></tr>
   </table></td></tr></table></body></html>`;
 }
 const btn = (href: string, label: string) =>
@@ -72,7 +73,7 @@ export async function mailConfirmed(b: Booking) {
        <p style="font-size:13px;line-height:1.6;color:#7A5A22">Need to talk to us? <a href="${waLink()}" style="color:#31310F">WhatsApp</a> or call ${practice.phones[0]}.</p>`),
     attachments: [{ filename: 'appointment.ics', content: Buffer.from(ics(b)).toString('base64'), content_type: 'text/calendar' }],
   });
-  const notify = await getSetting<string[]>('notify_emails', [practice.email]);
+  const notify = await getSetting<string[]>('notify_emails', practice.emails);
   for (const to of notify) await send({ to, subject: `New booking ${b.ref} · ${fmtWhen(new Date(b.start_at))}`,
     html: layout('New booking', `${details(b)}<p style="font-size:14px;line-height:1.6"><b>${esc(b.patient_name)}</b><br>${esc(b.patient_phone)} · ${esc(b.patient_email)}${b.reason ? `<br><br>${esc(b.reason)}` : ''}</p>`) });
 }
@@ -96,4 +97,32 @@ export async function mailPaymentLink(b: Booking) {
 export async function mailReminder(b: Booking) {
   await send({ to: b.patient_email, subject: `Tomorrow: ${fmtWhen(new Date(b.start_at))}`,
     html: layout('See you tomorrow', `${details(b)}<p style="line-height:1.6">Please bring your ID, medical aid card and a list of your current medication.</p><p>${btn(manage(b), 'Manage booking')}</p>`) });
+}
+
+/* ── membership ── */
+
+const planOf = (m: Membership) => PLANS.find((p) => p.id === m.plan)!;
+function memberDetails(m: Membership) {
+  const p = planOf(m);
+  return `<table role="presentation" width="100%" style="border-top:1px solid #EAE1CB;border-bottom:1px solid #EAE1CB;margin:18px 0">
+    <tr><td style="padding:8px 0;color:#7A5A22;font-size:13px;width:120px">Plan</td><td style="padding:8px 0;font-size:14px">${p.name} · ${p.label}</td></tr>
+    <tr><td style="padding:8px 0;color:#7A5A22;font-size:13px">Monthly</td><td style="padding:8px 0;font-size:14px">${rands(m.price_cents)}</td></tr>
+    <tr><td style="padding:8px 0;color:#7A5A22;font-size:13px;vertical-align:top">Includes</td><td style="padding:8px 0;font-size:14px;line-height:1.6">${p.benefits.map(esc).join('<br>')}</td></tr></table>`;
+}
+const memberLink = (m: Membership) => `${site()}/membership/${m.manage_token}`;
+
+export async function mailMembershipWelcome(m: Membership) {
+  await send({ to: m.email, subject: `Welcome to ${planOf(m).name} membership`,
+    html: layout(`Welcome, ${esc(m.name.split(' ')[0])}.`,
+      `<p style="line-height:1.6">Your ${planOf(m).name} membership is active. ${rands(m.price_cents)} is charged to your card every month; you can update your card or cancel at any time.</p>${memberDetails(m)}
+       <p style="line-height:1.6">To send a brief, non-urgent medical query, <a href="${waLink('Hi, I am a member and have a brief medical query.')}" style="color:#31310F">WhatsApp us</a> or email ${practice.email}.</p>
+       <p>${btn(memberLink(m), 'Manage membership')}</p><p style="font-size:12px;color:#7A5A22;line-height:1.6">${esc(membershipNote)} In an emergency, call 112 or 10177.</p>`) });
+  const notify = await getSetting<string[]>('notify_emails', practice.emails);
+  for (const to of notify) await send({ to, subject: `New ${planOf(m).name} member: ${m.name}`,
+    html: layout(`New ${planOf(m).name} member`, `${memberDetails(m)}<p style="font-size:14px;line-height:1.6"><b>${esc(m.name)}</b><br>${esc(m.phone)} · ${esc(m.email)}</p>`) });
+}
+
+export async function mailMembershipCancelled(m: Membership) {
+  await send({ to: m.email, subject: `Your ${planOf(m).name} membership is cancelled`,
+    html: layout('Membership cancelled', `<p style="line-height:1.6">No further payments will be taken. Thank you for being a member; you are welcome back any time.</p>${memberDetails(m)}<p>${btn(site() + '/care-plans', 'View plans')}</p>`) });
 }

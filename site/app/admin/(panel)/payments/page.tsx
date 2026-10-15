@@ -10,7 +10,7 @@ export default async function Payments(props: PageProps<'/admin/payments'>) {
   const sp = await props.searchParams;
   const status = typeof sp.status === 'string' ? sp.status : '';
   const rows = await q<{ id: number; booking_id: string; reference: string; provider: string; amount_cents: number; status: string; channel: string | null; paid_at: Date | null; created_at: Date; patient_name: string; ref: string }>(
-    `select p.*, b.patient_name, b.ref from payments p join bookings b on b.id = p.booking_id ${status ? 'where p.status = $1' : ''} order by p.created_at desc limit 300`, status ? [status] : []);
+    `select p.*, coalesce(b.patient_name, m.name) patient_name, coalesce(b.ref, initcap(m.plan) || ' membership') ref from payments p left join bookings b on b.id = p.booking_id left join memberships m on m.id = p.membership_id ${status ? 'where p.status = $1' : ''} order by p.created_at desc limit 300`, status ? [status] : []);
   const due = await q<{ id: string; ref: string; patient_name: string; price_cents: number }>(`select id, ref, patient_name, price_cents from bookings where payment_status = 'refund_pending' order by updated_at desc`);
   return (
     <>
@@ -34,7 +34,7 @@ export default async function Payments(props: PageProps<'/admin/payments'>) {
             <tbody>{rows.map((p) => (
               <tr key={p.id}>
                 <td className="tnum">{fmtShort(new Date(p.paid_at ?? p.created_at))} {fmtTime(new Date(p.paid_at ?? p.created_at))}</td>
-                <td><Link href={`/admin/bookings/${p.booking_id}`}>{p.patient_name}</Link><br /><small className="muted">{p.ref}</small></td>
+                <td>{p.booking_id ? <Link href={`/admin/bookings/${p.booking_id}`}>{p.patient_name}</Link> : <Link href="/admin/members">{p.patient_name}</Link>}<br /><small className="muted">{p.ref}</small></td>
                 <td><small>{p.reference}</small></td>
                 <td>{p.provider === 'at_visit' ? 'At practice' : p.provider === 'mock' ? 'Test checkout' : 'Paystack'}<br /><small className="muted">{(p.channel ?? '–').replace('_', ' ')}</small></td>
                 <td className="num">{rands(p.amount_cents)}</td>

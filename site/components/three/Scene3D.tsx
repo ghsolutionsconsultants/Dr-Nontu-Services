@@ -3,12 +3,12 @@ import { useEffect, useRef } from 'react';
 import type { SceneKind } from './engine';
 
 /** A 3D object slot. The engine (three.js) is fetched only when a page actually shows one. */
-export function Scene3D({ kind, className = '', delay }: { kind: SceneKind; className?: string; delay?: number }) {
+export function Scene3D({ kind, className = '', delay, still }: { kind: SceneKind; className?: string; delay?: number; still?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let dispose: (() => void) | undefined, cancelled = false;
     const el = ref.current!;
-    const run = () => import('./engine').then((m) => { if (!cancelled) dispose = m.mount(el, kind, { delay }); });
+    const run = () => import('./engine').then((m) => { if (!cancelled) dispose = m.mount(el, kind, { delay, still }); });
     const go = () => {
       const waiting = document.documentElement.classList.contains('intro-running') && !(window as unknown as { __dnIntroDone?: boolean }).__dnIntroDone;
       if (waiting) addEventListener('dn:intro-done', () => run(), { once: true }); else run();
@@ -17,6 +17,6 @@ export function Scene3D({ kind, className = '', delay }: { kind: SceneKind; clas
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); go(); } }, { rootMargin: '400px' });
     io.observe(el);
     return () => { cancelled = true; io.disconnect(); dispose?.(); };
-  }, [kind, delay]);
+  }, [kind, delay, still]);
   return <div ref={ref} className={`stage3d ${className}`} aria-hidden><canvas /></div>;
 }

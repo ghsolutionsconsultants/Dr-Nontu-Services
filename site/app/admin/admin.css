@@ -2,7 +2,7 @@
 .adm{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh;background:var(--linen);font-size:15px}
 .adm-side{position:sticky;top:0;height:100vh;background:var(--ink);color:var(--linen);display:flex;flex-direction:column;padding:22px 16px;gap:4px;overflow-y:auto}
 .adm-brand{display:flex;gap:10px;align-items:center;padding:4px 8px 22px;text-decoration:none}
-.adm-brand svg{width:34px;height:34px;background:var(--linen);border-radius:50%;padding:3px}
+.adm-brand img{width:36px;height:36px;object-fit:contain;background:var(--linen);border-radius:50%;padding:4px}
 .adm-brand b{font-family:var(--display);font-weight:500;letter-spacing:.12em;font-size:.92rem;display:block}
 .adm-brand small{font-size:.6rem;letter-spacing:.28em;color:var(--gold-soft);font-weight:600}
 .adm-nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:color-mix(in srgb,var(--linen) 72%,var(--ink));transition:background .25s,color .25s}

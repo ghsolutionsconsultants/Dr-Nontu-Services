@@ -11,14 +11,15 @@ export default async function TestCheckout(props: PageProps<'/pay/test'>) {
   if (paymentMode() !== 'mock') notFound();
   const { reference } = await props.searchParams;
   const p = typeof reference === 'string' ? await one<{ amount_cents: number; ref: string; patient_email: string }>(
-    `select p.amount_cents, b.ref, b.patient_email from payments p join bookings b on b.id = p.booking_id where p.reference = $1`, [reference]) : undefined;
+    `select p.amount_cents, coalesce(b.ref, initcap(m.plan) || ' membership · monthly') ref, coalesce(b.patient_email, m.email) patient_email
+       from payments p left join bookings b on b.id = p.booking_id left join memberships m on m.id = p.membership_id where p.reference = $1`, [reference]) : undefined;
   if (!p) notFound();
   return (
     <section className="section page-fade" style={{ paddingTop: 'calc(var(--hdr-h) + 64px)', minHeight: '90vh' }}>
       <div className="wrap" style={{ maxWidth: 560 }}>
         <div className="notice" style={{ marginBottom: 24 }}><b>Test checkout.</b> Paystack isn&rsquo;t connected yet, so no money moves. Add <code>PAYSTACK_SECRET_KEY</code> to switch to real payments.</div>
         <div className="book-card" style={{ padding: 32 }}>
-          <span className="eyebrow">Booking {p.ref}</span>
+          <span className="eyebrow">{p.ref.startsWith('DN-') ? `Booking ${p.ref}` : p.ref}</span>
           <h1 className="display" style={{ fontSize: 'var(--step-3)', margin: '14px 0 6px' }}>Pay {rands(p.amount_cents)}</h1>
           <p className="muted" style={{ marginTop: 0 }}>{p.patient_email}</p>
           <form action="/api/pay/test" method="post" className="stack" style={{ marginTop: 24 }}>

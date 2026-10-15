@@ -7,10 +7,13 @@ export const practice = {
   role: 'General Practitioner · Primary & Emergency Care',
   tagline: 'Every patient. Expertly cared for.',
   practiceNo: '1344625',
-  phones: ['+27 82 050 3345', '+27 60 721 9660'],
+  // Bookings & Enquiries (supplied by Dr Nontu, Oct 2026)
+  phones: ['+27 68 982 0921'],
   email: 'info@drnontu.co.za',
-  // TODO(client): confirm which number is on WhatsApp
-  whatsapp: '27820503345',
+  // the practice email has occasional hiccups, so the Gmail address is shown too and gets booking alerts
+  emails: ['info@drnontu.co.za', 'drnontumedicalpractice@gmail.com'],
+  // TODO(client): confirm this bookings number is also the WhatsApp number
+  whatsapp: '27689820921',
   social: { instagram: '', facebook: '', tiktok: '' },
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
 };
@@ -18,9 +21,11 @@ export const practice = {
 export const tel = (p: string) => 'tel:' + p.replace(/\s/g, '');
 export const waLink = (text?: string) => `https://wa.me/${practice.whatsapp}${text ? '?text=' + encodeURIComponent(text) : ''}`;
 
-export const img = (id: string, w = 1200) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=72`;
+// Photos are either the practice's own files in /public/photos ("/photos/reception.jpg") or stock placeholders (Unsplash ids).
+export const img = (id: string, w = 1200) => (id.startsWith('/') ? id : `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=72`);
 
-// Every photograph is checked: no faces.
+// Stock placeholders until the practice's own photographs arrive: replace a value with "/photos/<file>".
+// See public/photos/README.md for the list of shots.
 export const photos = {
   tea: '1633945984522-a19268cc75ad',
   handsSteth: '1666887364752-29dcc75d6aee',
@@ -80,15 +85,16 @@ export const services: {
 
 export const locations = [
   { id: 'esther-park', name: 'Esther Park', kind: 'clinic' as const, region: 'Kempton Park',
-    address: ['95 Parkland Dr, Office 7B', 'Esther Park, Kempton Park, 1619'],
+    // TODO(client): office number: the brief said 7B, the latest contact details say 78
+    address: ['95 Parkland Drive, Office 78', 'Esther Park, Kempton Park, 1619'],
     map: 'https://maps.google.com/?q=95+Parkland+Dr+Esther+Park+Kempton+Park',
     embed: 'https://maps.google.com/maps?q=95%20Parkland%20Dr%2C%20Esther%20Park%2C%20Kempton%20Park&z=15&output=embed',
     parking: 'On-site parking available. Confirm directions with reception.' },
   { id: 'fourways', name: 'Fourways', kind: 'clinic' as const, region: 'Fourways',
-    address: ['The Parks Lifestyle Apartments', '22 Century Boulevard, Fourways'],
+    address: ['22 Century Boulevard', 'Fourways, 1684'],
     map: 'https://maps.google.com/?q=22+Century+Boulevard+Fourways',
     embed: 'https://maps.google.com/maps?q=22%20Century%20Boulevard%2C%20Fourways&z=15&output=embed',
-    parking: 'Visitor parking at The Parks. Confirm access with reception.' },
+    parking: 'Visitor parking available. Confirm access with reception.' },
 ];
 
 export const hours = [
@@ -114,11 +120,28 @@ export const faq: { q: string; a: string }[] = [
   { q: 'What payment methods do you accept?', a: 'Card, Instant EFT and Apple Pay online via Paystack, or cash, card and medical aid at your visit. Virtual consultations are paid online when you book.' },
 ];
 
+// Membership (care plans), as supplied by Dr Nontu
+export const membershipNote = 'Membership benefits are for non-urgent healthcare support and continuity of care.';
+export const memberships: { id: 'silver' | 'gold'; name: string; label: string; priceCents: number; benefits: string[] }[] = [
+  { id: 'silver', name: 'Silver', label: 'Essential Care', priceCents: 14900, benefits: [
+    'Up to 2 brief, non-urgent medical queries per month',
+    '50% off one prescription service per month',
+    'Monthly health & wellness newsletter',
+  ] },
+  { id: 'gold', name: 'Gold', label: 'Enhanced Care', priceCents: 39900, benefits: [
+    'Up to 2 brief, non-urgent medical queries per month',
+    '50% off one prescription service per month',
+    'Priority access to available appointments',
+    'One scheduled 5–10 minute telephonic consultation per month',
+    'Monthly health & wellness newsletter',
+  ] },
+];
+
 export const nav = [
   { href: '/about', label: 'About' },
   { href: '/services', label: 'Services' },
   { href: '/house-calls', label: 'House calls' },
-  { href: '/care-plans', label: 'Care plans' },
+  { href: '/care-plans', label: 'Membership' },
   { href: '/fees', label: 'Fees' },
   { href: '/contact', label: 'Contact' },
 ];

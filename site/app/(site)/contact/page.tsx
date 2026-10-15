@@ -1,5 +1,4 @@
 import { PageHero, LocationsBlock } from '@/components/site/Sections';
-import { Hours } from '@/components/site/DayTimeline';
 import { Icon, WhatsAppIcon } from '@/components/site/Icon';
 import { locations, photos, practice, tel, waLink } from '@/lib/content';
 import { pageMeta } from '@/lib/seo';
@@ -9,12 +8,12 @@ export const generateMetadata = () => pageMeta('/contact');
 export default function Contact() {
   return (
     <>
-      <PageHero eyebrow="Locations & contact" title={<>Two rooms, <em>one standard of care.</em></>} photo={photos.hallway} photoAlt="The practice hallway" scene="map"
-        lede="Visit us in Esther Park or Fourways, book a house call, or reach us any time on WhatsApp.">
+      <PageHero eyebrow="Locations & contact" title={<>Two rooms, <em>one standard of care.</em></>} photo={photos.hallway} photoAlt="The practice hallway"
+        lede="Bookings and enquiries by phone, WhatsApp or email. Practice No. 1344625.">
         <div className="contact-cards" style={{ marginTop: 28, maxWidth: 520 }}>
           <a className="contact-card" href={waLink()}><WhatsAppIcon className="" /><span><small>WhatsApp</small><b>Message us</b></span></a>
           {practice.phones.map((p) => <a key={p} className="contact-card" href={tel(p)}><Icon name="phone" /><span><small>Call</small><b>{p}</b></span></a>)}
-          <a className="contact-card" href={`mailto:${practice.email}`}><Icon name="mail" /><span><small>Email</small><b>{practice.email}</b></span></a>
+          {practice.emails.map((e) => <a key={e} className="contact-card" href={`mailto:${e}`}><Icon name="mail" /><span><small>Email</small><b>{e}</b></span></a>)}
         </div>
       </PageHero>
       <section className="section section--rule"><div className="wrap"><LocationsBlock /></div></section>
@@ -32,7 +31,6 @@ export default function Contact() {
           </div>
         </section>
       ))}
-      <section className="section day"><div className="wrap"><Hours title={<>Opening hours, <em>beat by beat.</em></>} /></div></section>
     </>
   );
 }

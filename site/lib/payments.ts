@@ -7,9 +7,9 @@ import { practice } from './content';
 // follows the same redirect → verify → confirm path, so the whole flow can be exercised offline.
 export const paymentMode = () => (process.env.PAYSTACK_SECRET_KEY ? 'paystack' : 'mock') as 'paystack' | 'mock';
 const PAYSTACK = 'https://api.paystack.co';
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL ?? practice.url;
+export const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL ?? practice.url;
 
-async function paystack<T>(path: string, init?: RequestInit): Promise<T> {
+export async function paystack<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(PAYSTACK + path, {
     ...init,
     headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, 'Content-Type': 'application/json', ...init?.headers },
@@ -20,7 +20,7 @@ async function paystack<T>(path: string, init?: RequestInit): Promise<T> {
   return j.data as T;
 }
 
-export interface Payment { id: number; booking_id: string; provider: string; reference: string; amount_cents: number; status: string; channel: string | null; paid_at: Date | null }
+export interface Payment { id: number; booking_id: string | null; membership_id: string | null; provider: string; reference: string; amount_cents: number; status: string; channel: string | null; paid_at: Date | null }
 
 /** Starts an online payment for a booking and returns the checkout URL. */
 export async function startPayment(b: Booking): Promise<string> {
@@ -43,15 +43,20 @@ export async function startPayment(b: Booking): Promise<string> {
 }
 
 /**
- * Marks a payment successful and confirms its booking. Idempotent: webhook, callback and
- * the test checkout may all report the same reference.
+ * Marks a payment successful and confirms what it paid for: a booking, or a membership's first month.
+ * Idempotent: webhook, callback and the test checkout may all report the same reference.
  */
-export async function settlePayment(reference: string, amountCents: number, channel: string | null, raw: unknown) {
+export type Settled = { ok: true; bookingId: string | null; membershipId: string | null; already: boolean } | { ok: false; reason: string };
+export async function settlePayment(reference: string, amountCents: number, channel: string | null, raw: unknown): Promise<Settled> {
   const p = await one<Payment>(`select * from payments where reference = $1`, [reference]);
   if (!p) return { ok: false as const, reason: 'unknown reference' };
   if (amountCents !== p.amount_cents) return { ok: false as const, reason: 'amount mismatch' };
-  if (p.status === 'success') return { ok: true as const, bookingId: p.booking_id, already: true };
+  if (p.status === 'success') return { ok: true as const, bookingId: p.booking_id, membershipId: p.membership_id, already: true };
   await q(`update payments set status = 'success', channel = $2, paid_at = now(), raw = $3::text::jsonb where id = $1`, [p.id, channel, JSON.stringify(raw ?? {})]);
+  if (p.membership_id) {
+    await q(`update memberships set status = 'active', started_at = coalesce(started_at, now()), next_payment_at = now() + interval '1 month', updated_at = now() where id = $1`, [p.membership_id]);
+    return { ok: true as const, bookingId: null, membershipId: p.membership_id, already: false };
+  }
   // An expired hold whose time is still free comes back to life; if someone took the slot meanwhile,
   // the exclusion constraint refuses and the booking is flagged for refund.
   try {
@@ -60,14 +65,14 @@ export async function settlePayment(reference: string, amountCents: number, chan
   } catch {
     await q(`update bookings set payment_status = 'refund_pending', updated_at = now() where id = $1`, [p.booking_id]);
   }
-  return { ok: true as const, bookingId: p.booking_id, already: false };
+  return { ok: true as const, bookingId: p.booking_id, membershipId: null, already: false };
 }
 
 /** Asks Paystack for the truth about a reference (used by the redirect callback). */
-export async function verifyPayment(reference: string) {
+export async function verifyPayment(reference: string): Promise<Settled> {
   if (paymentMode() === 'mock') {
     const p = await one<Payment>(`select * from payments where reference = $1`, [reference]);
-    return p?.status === 'success' ? { ok: true as const, bookingId: p.booking_id } : { ok: false as const, reason: 'not paid' };
+    return p?.status === 'success' ? { ok: true as const, bookingId: p.booking_id, membershipId: p.membership_id, already: true } : { ok: false as const, reason: 'not paid' };
   }
   const d = await paystack<{ status: string; amount: number; channel: string; currency: string }>(`/transaction/verify/${encodeURIComponent(reference)}`);
   if (d.status !== 'success' || d.currency !== 'ZAR') return { ok: false as const, reason: d.status };

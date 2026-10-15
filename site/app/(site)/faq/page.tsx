@@ -9,7 +9,7 @@ export default function Faq() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }} />
-      <PageHero eyebrow="Questions" title={<>Answers, <em>when you need them.</em></>} photo={photos.tea} photoAlt="A cup of tea on a sunlit table" shape="round" scene="phone"
+      <PageHero eyebrow="Questions" title={<>Answers, <em>when you need them.</em></>} photo={photos.tea} photoAlt="A cup of tea on a sunlit table" shape="round"
         lede="The things patients ask us most. Can't find yours? WhatsApp us; we're happy to help." />
       <section className="section section--rule">
         <div className="wrap g12">

@@ -9,6 +9,7 @@ const LINKS: [string, string, React.ReactNode][] = [
   ['/admin/bookings', 'Bookings', I('M5 4h14v16H5zM9 9h6M9 13h6M9 17h3')],
   ['/admin/availability', 'Availability', I('M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2')],
   ['/admin/fees', 'Fees & lengths', I('M12 3v18M17 7H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H7')],
+  ['/admin/members', 'Members', I('M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2 21v-1a6 6 0 0 1 12 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9')],
   ['/admin/payments', 'Payments', I('M3 7h18v12H3zM3 11h18M7 15h4')],
   ['/admin/financials', 'Financials', I('M4 20V10M10 20V4M16 20v-7M22 20H2')],
   ['/admin/analytics', 'Site stats', I('M3 17l5-5 4 4 8-8M15 8h5v5')],
@@ -23,7 +24,7 @@ export function AdminNav() {
     <nav className="adm-nav">
       {LINKS.map(([href, label, icon], i) => (
         <span key={href} style={{ display: 'contents' }}>
-          {(i === 5 || i === 9) && <hr />}
+          {(i === 5 || i === 10) && <hr />}
           <Link href={href} aria-current={(href === '/admin' ? p === href : p.startsWith(href)) ? 'page' : undefined}>{icon}<span>{label}</span></Link>
         </span>
       ))}

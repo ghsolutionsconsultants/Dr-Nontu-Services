@@ -8,7 +8,7 @@ export const metadata = { title: 'Settings' };
 
 export default async function Settings(props: PageProps<'/admin/settings'>) {
   const sp = await props.searchParams;
-  const [b, notify, areas] = await Promise.all([bookingSettings(), getSetting<string[]>('notify_emails', [practice.email]), getSetting<string[]>('house_call_areas', [])]);
+  const [b, notify, areas] = await Promise.all([bookingSettings(), getSetting<string[]>('notify_emails', practice.emails), getSetting<string[]>('house_call_areas', [])]);
   const svc = [
     ['Database', process.env.DATABASE_URL ? 'Supabase / Postgres' : 'Local (PGlite)', !!process.env.DATABASE_URL],
     ['Payments', paymentMode() === 'paystack' ? 'Paystack' : 'Test checkout', paymentMode() === 'paystack'],
