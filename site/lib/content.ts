@@ -12,12 +12,18 @@ export const practice = {
   email: 'info@drnontu.co.za',
   // the practice email has occasional hiccups, so the Gmail address is shown too and gets booking alerts
   emails: ['info@drnontu.co.za', 'drnontumedicalpractice@gmail.com'],
-  // TODO(client): WhatsApp number to follow (the bookings number is not on WhatsApp).
-  // While this is empty, WhatsApp buttons become "Send a message" links to the contact form.
-  whatsapp: '',
+  // the bookings number takes calls and WhatsApp (confirmed by Dr Nontu, Oct 2026).
+  // Leave empty to turn every WhatsApp button into a "Send a message" link to the contact form.
+  whatsapp: '27689820921',
   social: { instagram: '', facebook: '', tiktok: '' },
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
 };
+
+// Dr Nontu's biography, in her words (Oct 2026). The About page shows both paragraphs; the home page the first.
+export const bio = [
+  'Dr Nontu is a qualified medical practitioner with over a decade of experience in the medical field, beginning with her clinical training in 2014. She holds an MBChB from the University of Pretoria, a BCMP from Walter Sisulu University, and a Diploma in Primary Emergency Care (DipPEC) from the Colleges of Medicine of South Africa.',
+  'With expertise in general medical practice and emergency care, Dr Nontu is equipped to manage a wide range of medical conditions, from routine consultations and chronic disease management to complex clinical presentations and medical emergencies. She combines sound clinical judgement, evidence-based decision-making and a systematic approach to deliver competent, professional and compassionate care.',
+];
 
 export const tel = (p: string) => 'tel:' + p.replace(/\s/g, '');
 export const hasWhatsApp = Boolean(practice.whatsapp);

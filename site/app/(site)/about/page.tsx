@@ -1,6 +1,6 @@
 import { PageHero, SecHead } from '@/components/site/Sections';
 import { Icon } from '@/components/site/Icon';
-import { img, photos, practice } from '@/lib/content';
+import { bio, img, photos, practice } from '@/lib/content';
 import { pageMeta } from '@/lib/seo';
 
 export const generateMetadata = () => pageMeta('/about');
@@ -15,22 +15,19 @@ const VALUES = [
 export default function About() {
   return (
     <>
-      <PageHero eyebrow="About the practice" title={<>Healthcare that feels <em>personal.</em></>} photo={photos.handsHold} photoAlt="Two hands resting together on a table"
-        lede="Meet Dr Nontu: a warm, kind and compassionate doctor who believes that every patient matters." />
+      <PageHero eyebrow="About the practice" title={<>Healthcare that feels <em>personal.</em></>} photo={photos.handsHold} photoAlt="Two hands resting together on a table" />
 
       <section className="section section--rule">
         <div className="wrap g12">
           <div className="c1-4">
-            <div className="ph arch rv" style={{ aspectRatio: '3/4' }}>
-              
+            <div className="ph arch about-doc-ph rv">
               <img src={img(photos.stethTable, 800)} alt="A stethoscope resting on a desk" loading="lazy" />
             </div>
           </div>
           <div className="c5-12 prose rv">
             <span className="eyebrow">{practice.doctor}</span>
-            <p className="quote display" style={{ marginTop: 18 }}>Good healthcare starts with <em>listening.</em></p>
-            <p>Because sometimes you don&rsquo;t just need a doctor to treat what&rsquo;s wrong. You need someone who listens. Someone who reassures you. Someone who makes you feel that you&rsquo;re going to be okay.</p>
-            <p>At Dr Nontu Medical Practice we provide comprehensive primary healthcare with a focus on prevention, early intervention and personalised treatment, in a warm, welcoming environment where every patient is treated as an individual, with kindness, dignity and genuine care from the moment you walk through the door.</p>
+            <h2 className="quote display" style={{ marginTop: 18 }}>About <em>Dr Nontu</em></h2>
+            {bio.map((p) => <p key={p.slice(0, 24)}>{p}</p>)}
             <p><b>{practice.credentials}</b><br />{practice.role}</p>
           </div>
         </div>

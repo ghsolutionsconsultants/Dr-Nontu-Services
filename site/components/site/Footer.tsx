@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 import { MessageButton } from './MessageButton';
 
 export function Footer() {
-  const follow = ([['Instagram', practice.social.instagram], ['Facebook', practice.social.facebook], ['TikTok', practice.social.tiktok], ['WhatsApp', hasWhatsApp ? waLink() : '']] as const).filter(([, href]) => href);
+  const follow = ([['Instagram', practice.social.instagram], ['Facebook', practice.social.facebook], ['TikTok', practice.social.tiktok]] as const).filter(([, href]) => href);
   return (
     <footer className="ftr">
       <div className="wrap">
@@ -18,7 +18,7 @@ export function Footer() {
         <div className="ftr-cols">
           <div><h5>Visit</h5>{locations.map((l) => <Link key={l.id} href={`/contact#${l.id}`}>{l.name}</Link>)}<Link href="/house-calls">House calls</Link><Link href="/services/virtual-consultations">Virtual consultations</Link></div>
           <div><h5>Practice</h5><Link href="/about">About Dr Nontu</Link><Link href="/services">Services</Link><Link href="/care-plans">Membership</Link><Link href="/fees">Fees &amp; medical aid</Link><Link href="/faq">FAQ</Link></div>
-          <div><h5>Talk to us</h5>{practice.phones.map((p) => <a key={p} className="tnum" href={tel(p)}>{p}</a>)}{practice.emails.map((e) => <a key={e} href={`mailto:${e}`}>{e}</a>)}<Link href="/contact#message">Send a message</Link></div>
+          <div><h5>Talk to us</h5>{practice.phones.map((p) => <a key={p} className="tnum" href={tel(p)}>{p}</a>)}{hasWhatsApp && <a href={waLink()}>WhatsApp</a>}{practice.emails.map((e) => <a key={e} href={`mailto:${e}`}>{e}</a>)}<Link href="/contact#message">Send a message</Link></div>
           {follow.length > 0 && <div><h5>Follow</h5>{follow.map(([label, href]) => <a key={label} href={href}>{label}</a>)}</div>}
         </div>
       </div>

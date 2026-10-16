@@ -4,7 +4,7 @@ import { ServicesIndex } from '@/components/site/ServicesIndex';
 import { SecHead, Ways, PlansBlock, LocationsBlock } from '@/components/site/Sections';
 import { Icon } from '@/components/site/Icon';
 import { MessageButton } from '@/components/site/MessageButton';
-import { img, photos, practice, services, tel } from '@/lib/content';
+import { bio, img, photos, practice, services, tel } from '@/lib/content';
 import { pageMeta } from '@/lib/seo';
 
 export const generateMetadata = () => pageMeta('/');
@@ -15,11 +15,10 @@ export default function Home() {
       <Hero>
         <div className="hero-foot">
           <div>
-            <p className="lede rv">Meet Dr Nontu: a GP who listens first, explains clearly, and makes sure you leave knowing you&rsquo;ll be okay.</p>
             <div className="ctas rv">
               <Link className="btn" href="/book" data-track="hero_book">Book an appointment <Icon name="arrow" /></Link>
-              <MessageButton />
-              <a className="btn btn--ghost" href={tel(practice.phones[0])}>Call {practice.phones[0].replace('+27 ', '0')}</a>
+              <MessageButton compact />
+              <a className="btn btn--ghost" href={tel(practice.phones[0])}><span>Call <span className="sm-hide">{practice.phones[0].replace('+27 ', '0')}</span><span className="sm-only">us</span></span></a>
             </div>
           </div>
           <div className="creds rv">
@@ -34,10 +33,9 @@ export default function Home() {
         <div className="wrap g12 about-row">
           <div className="c1-4"><div className="ph soft about-ph rv"><img src={img(photos.oliveVase, 700)} alt="Olive branches in a white ceramic vase" loading="lazy" /></div></div>
           <div className="c5-12 rv">
-            <span className="eyebrow">Healthcare that feels personal</span>
-            <p className="statement-q display">Sometimes you don&rsquo;t just need a doctor to treat what&rsquo;s wrong. You need someone who <em>listens</em>, who reassures you, and who makes you feel you&rsquo;re going to be okay.</p>
-            <p className="muted" style={{ maxWidth: '56ch' }}>Comprehensive primary healthcare with a focus on prevention, early intervention and personalised treatment, in a warm, welcoming space where every patient is treated as an individual.</p>
-            <Link className="link-u" href="/about">About Dr Nontu →</Link>
+            <span className="eyebrow">About Dr Nontu</span>
+            <p className="about-intro">{bio[0]}</p>
+            <Link className="link-u" href="/about">More about Dr Nontu →</Link>
           </div>
         </div>
       </section>

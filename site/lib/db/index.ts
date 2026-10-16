@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { seed } from './seed';
+import { seed, syncedContent } from './seed';
 import { schemaSql } from './schema';
 import { parseDbUrl } from './url';
 
@@ -70,7 +70,7 @@ async function connect(): Promise<Db> {
  * Schema + seed in one transaction behind an advisory lock. Builds prerender with several workers at once;
  * the lock makes the first one set up the database while the others wait, then find it done.
  */
-export const SCHEMA_VERSION = createHash('sha256').update(schemaSql).digest('hex').slice(0, 12);
+export const SCHEMA_VERSION = createHash('sha256').update(schemaSql).update(syncedContent).digest('hex').slice(0, 12);
 
 export async function migrate(db: Db) {
   await db.tx(async (q, exec) => {

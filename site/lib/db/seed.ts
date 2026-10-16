@@ -17,10 +17,19 @@ export const seoDefaults: Record<string, [string, string]> = {
   '/book': ['Book an appointment | Dr Nontu Medical Practice', 'Choose in person, house call or virtual, pick a length and a time, and pay online or at your visit.'],
 };
 
+/** Content the database copies from content.ts. It is part of SCHEMA_VERSION, so changing it re-runs migrate() on the next deploy. */
+export const syncedContent = JSON.stringify(locations.map((l) => [l.id, l.name, l.address, l.map, l.parking]));
+
+/** Keeps the clinics' names and addresses (used by the booking wizard and emails) in step with content.ts. */
+async function syncLocations(q: Query) {
+  for (const l of locations)
+    await q(`update locations set name = $2, address = $3, map_url = $4, parking = $5 where id = $1`, [l.id, l.name, l.address.join(', '), l.map, l.parking]);
+}
+
 /** Runs inside migrate()'s locked transaction. */
 export async function seed(q: Query) {
   const done = await q(`select 1 from settings where key = 'seeded'`);
-  if (done.length) { await ensureAdmin(q); return; }
+  if (done.length) { await syncLocations(q); await ensureAdmin(q); return; }
 
   {
     const set = (k: string, v: unknown) => q(`insert into settings (key, value) values ($1, $2::text::jsonb) on conflict (key) do nothing`, [k, JSON.stringify(v)]);

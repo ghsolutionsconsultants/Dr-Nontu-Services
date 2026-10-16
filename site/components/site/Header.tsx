@@ -2,8 +2,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { nav } from '@/lib/content';
+import { nav, practice, tel } from '@/lib/content';
 import { Icon } from './Icon';
+import { MessageButton } from './MessageButton';
+
+const MENU = [{ href: '/', label: 'Home' }, ...nav, { href: '/faq', label: 'FAQ' }];
 
 export function Header() {
   const pathname = usePathname();
@@ -16,7 +19,13 @@ export function Header() {
   }, []);
   const [path, setPath] = useState(pathname);
   if (path !== pathname) { setPath(pathname); setOpen(false); }
-  useEffect(() => { document.documentElement.style.overflow = open ? 'hidden' : ''; }, [open]);
+  useEffect(() => {
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    if (!open) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    addEventListener('keydown', esc);
+    return () => removeEventListener('keydown', esc);
+  }, [open]);
   const cur = (href: string) => (pathname === href || pathname.startsWith(href + '/') ? 'page' : undefined);
 
   return (
@@ -33,11 +42,16 @@ export function Header() {
           <button className="menu-btn" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen((o) => !o)}><span /><span /></button>
         </div>
       </div>
-      <nav className="mnav" aria-label="Mobile" aria-hidden={!open}>
-        <Link href="/">Home</Link>
-        {nav.map((n) => <Link key={n.href} href={n.href} tabIndex={open ? 0 : -1}>{n.label}</Link>)}
-        <Link href="/faq" tabIndex={open ? 0 : -1}>FAQ</Link>
-        <Link className="btn" href="/book" tabIndex={open ? 0 : -1}>Book an appointment <Icon name="arrow" /></Link>
+      {/* any tap on a link closes the menu, including a link to the page you are already on */}
+      <nav className="mnav" aria-label="Mobile" aria-hidden={!open} onClick={(e) => { if ((e.target as Element).closest('a')) setOpen(false); }}>
+        {MENU.map((n) => <Link key={n.href} className="mnav-link" href={n.href} aria-current={n.href === '/' ? (pathname === '/' ? 'page' : undefined) : cur(n.href)} tabIndex={open ? 0 : -1}>{n.label}</Link>)}
+        <div className="mnav-actions">
+          <Link className="btn" href="/book" tabIndex={open ? 0 : -1}>Book an appointment <Icon name="arrow" /></Link>
+          <div className="mnav-quick">
+            <a className="btn btn--ghost" href={tel(practice.phones[0])} tabIndex={open ? 0 : -1}><Icon name="phone" /> Call</a>
+            <MessageButton short tabIndex={open ? 0 : -1} />
+          </div>
+        </div>
       </nav>
     </header>
   );

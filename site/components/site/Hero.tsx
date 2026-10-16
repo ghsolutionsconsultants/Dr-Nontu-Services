@@ -49,7 +49,7 @@ export function Hero({ children }: { children: React.ReactNode }) {
       <div className="wrap">
         <div className="hero-grid">
           <div className="hero-copy">
-            <span className={`eyebrow rv${go ? ' in' : ''}`}>General practice · Esther Park &amp; Fourways</span>
+            <span className={`eyebrow rv${go ? ' in' : ''}`}><span className="sm-hide">General practice · </span>Esther Park &amp; Fourways</span>
             <h1 className="display" aria-label={LINES.map((l) => l.join(' ')).join(' ')}>
               {LINES.map(([a, b], i) => (
                 <span key={i} className={`ln${active === i ? ' on' : ''}`} onMouseEnter={() => { hovering.current = true; setActive(i); }} onMouseLeave={() => (hovering.current = false)}>

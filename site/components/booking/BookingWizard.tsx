@@ -131,7 +131,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
       </button>;
 
   return (
-    <div className="book-card rv" ref={bodyRef}>
+    <div className="book-card rv" ref={bodyRef} data-step={step}>
       <ol className="stepper">
         {STEPS.map((s, i) => (
           <li key={s} className={i < step ? 'done' : i === step ? 'cur' : ''} aria-current={i === step ? 'step' : undefined}>
@@ -225,7 +225,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
 
             {step === 5 && <>
               <h3>Confirm and pay</h3>
-              <p className="muted">Please check your booking. You can change any step by tapping it above.</p>
+              <p className="muted">Please check your booking. Go back to change anything.</p>
               <dl className="hours-list" style={{ margin: 0 }}>
                 <div><dt>Name</dt><dd style={{ margin: 0 }}>{d.name}</dd></div>
                 <div><dt>Contact</dt><dd style={{ margin: 0 }}>{d.phone} · {d.email}</dd></div>
@@ -258,9 +258,17 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
               {t.requires_prepay && <small style={{ color: 'color-mix(in srgb,var(--linen) 58%,var(--ink))', fontSize: '.8rem' }}>Virtual consultations are paid when you book.</small>}
             </div>
           )}
-          <div style={{ marginTop: step >= 4 ? 0 : 24 }}>{primary}</div>
+          <div className="sum-action" style={{ marginTop: step >= 4 ? 0 : 24 }}>{primary}</div>
         </aside>
       </div>
+      {/* phones and tablets: Back, the fee so far, and the next step stay in reach at the bottom of the screen */}
+      {step > 0 && (
+        <div className="book-bar">
+          <button className="book-back" onClick={() => go(step - 1)} aria-label="Back to the previous step"><Icon name="arrow" /></button>
+          <div className="book-bar-sum"><small>Step {step + 1} of {STEPS.length}</small><b className="tnum">{dur ? rands(dur.price_cents) : t?.name ?? ''}</b></div>
+          {primary}
+        </div>
+      )}
     </div>
   );
 }
