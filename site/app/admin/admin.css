@@ -130,3 +130,34 @@
   .adm-nav hr{display:none}
   .adm-side .who{display:none}
 }
+
+/* ───────── Booking form (new / edit) ───────── */
+.bk-form{display:grid;gap:18px;max-width:900px}
+.bk-form .card h2{margin-bottom:4px}
+.frm-group{display:grid;gap:8px}
+.frm-label{font-size:.8rem;font-weight:600;letter-spacing:.02em}
+.frm-check{display:flex!important;gap:10px;align-items:flex-start;font-weight:400!important;font-size:.9rem!important;letter-spacing:0!important;cursor:pointer}
+.frm-check input{margin-top:3px;accent-color:var(--moss);width:16px;height:16px;flex:none}
+.frm-check small{display:block;color:color-mix(in srgb,var(--ink) 60%,var(--linen));font-size:.8rem;margin-top:2px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{display:inline-flex!important;cursor:pointer;font-weight:500!important}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:1px solid var(--rule-strong);border-radius:999px;font-size:.88rem;background:#fff;transition:background .2s,border-color .2s,color .2s}
+.seg input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--linen)}
+.seg input:focus-visible+span{outline:2px solid var(--brass);outline-offset:2px}
+.seg input:disabled+span{opacity:.5;cursor:not-allowed}
+.seg small{font-weight:400;opacity:.75}
+.chips-a{display:flex;flex-wrap:wrap;gap:6px}
+.chips-a button{font:500 .86rem var(--sans);padding:8px 12px;border:1px solid var(--rule-strong);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:baseline}
+.chips-a button small{color:color-mix(in srgb,var(--ink) 55%,var(--linen));font-size:.76rem}
+.chips-a button[aria-pressed="true"]{background:var(--moss);border-color:var(--moss);color:var(--linen)}
+.chips-a button[aria-pressed="true"] small{color:color-mix(in srgb,var(--linen) 75%,var(--moss))}
+.bk-submit{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;bottom:0;z-index:2;padding:14px 18px;background:color-mix(in srgb,var(--linen) 92%,transparent);backdrop-filter:blur(8px);border:1px solid var(--rule);border-radius:10px}
+.bk-submit .b{min-width:160px}
+
+/* ───────── Bulk actions on the bookings list ───────── */
+.bulk{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:0 0 14px;margin-bottom:6px;border-bottom:1px solid var(--rule)}
+.bulk-all{display:inline-flex;gap:8px;align-items:center;font-size:.86rem;font-weight:600;margin-right:auto;cursor:pointer}
+.bulk-all input,.chk-col input{width:17px;height:17px;accent-color:var(--moss);cursor:pointer}
+.tbl .chk-col{width:34px;padding-right:0}
+.b:disabled{opacity:.45;cursor:not-allowed}

@@ -6,6 +6,7 @@ import { bookingAction } from '../../../actions';
 import { Badge, Flash, Head, TYPE_LABEL } from '@/components/admin/ui';
 import { dateKey, fmtWhen, hhmm, rands, sastMinutes, fmtShort, fmtTime } from '@/lib/time';
 import { practice } from '@/lib/content';
+import { ConfirmButton } from '@/components/admin/Confirm';
 
 export const metadata = { title: 'Booking' };
 
@@ -27,7 +28,8 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
     <>
       <Head eyebrow={`Booking ${b.ref}`} title={b.patient_name}>
         <Link className="b b--ghost" href="/admin/calendar">← Calendar</Link>
-        <a className="b b--ghost" href={`https://wa.me/${b.patient_phone.replace(/\D/g, '').replace(/^0/, '27')}?text=${encodeURIComponent(`Hi ${b.patient_name.split(' ')[0]}, this is ${practice.name} about your booking ${b.ref}.`)}`} target="_blank">WhatsApp patient</a>
+        <Link className="b" href={`/admin/bookings/${b.id}/edit`}>Edit booking</Link>
+        {b.patient_phone && <a className="b b--ghost" href={`https://wa.me/${b.patient_phone.replace(/\D/g, '').replace(/^0/, '27')}?text=${encodeURIComponent(`Hi ${b.patient_name.split(' ')[0]}, this is ${practice.name} about your booking ${b.ref}.`)}`} target="_blank">WhatsApp patient</a>}
       </Head>
       <Flash sp={sp} />
       <div className="grid grid-2">
@@ -46,8 +48,8 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
           <h2>Patient</h2>
           <dl className="dl">
             <dt>Name</dt><dd>{b.patient_name}</dd>
-            <dt>Phone</dt><dd><a href={`tel:${b.patient_phone.replace(/\s/g, '')}`}>{b.patient_phone}</a></dd>
-            <dt>Email</dt><dd><a href={`mailto:${b.patient_email}`}>{b.patient_email}</a></dd>
+            <dt>Phone</dt><dd>{b.patient_phone ? <a href={`tel:${b.patient_phone.replace(/\s/g, '')}`}>{b.patient_phone}</a> : '–'}</dd>
+            <dt>Email</dt><dd>{b.patient_email ? <a href={`mailto:${b.patient_email}`}>{b.patient_email}</a> : '–'}</dd>
             <dt>Date of birth</dt><dd>{b.patient_dob ? String(b.patient_dob).slice(0, 10) : '–'}</dd>
             <dt>Medical aid</dt><dd>{b.medical_aid ? `${b.medical_aid} ${b.medical_aid_no ?? ''}` : '–'}</dd>
           </dl>
@@ -58,7 +60,7 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
         {live && (
           <div className="card">
             <h2>Visit</h2>
-            <div className="adm-actions"><Op act={act} op="complete" label="Mark completed" /><Op act={act} op="no_show" label="No-show" kind="b--ghost" /><Op act={act} op="resend" label="Re-send confirmation" kind="b--ghost" /></div>
+            <div className="adm-actions"><Op act={act} op="complete" label="Mark completed" /><Op act={act} op="no_show" label="No-show" kind="b--ghost" />{b.patient_email && <Op act={act} op="resend" label="Re-send confirmation" kind="b--ghost" />}</div>
           </div>
         )}
         {!live && b.status !== 'cancelled' && b.status !== 'expired' && (
@@ -71,18 +73,27 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
               <form action={act} className="frm">
                 <input type="hidden" name="op" value="paid" />
                 <div className="frm-row">
-                  <label>Paid at the practice by<select className="sel" name="channel"><option value="card_machine">Card machine</option><option value="cash">Cash</option><option value="medical_aid">Medical aid</option></select></label>
+                  <label>Paid at the practice by<select className="sel" name="channel"><option value="card_machine">Card machine</option><option value="cash">Cash</option><option value="eft">EFT / bank transfer</option><option value="medical_aid">Medical aid</option></select></label>
                   <label>Amount (R)<input className="inp" name="amount" type="number" step="0.01" defaultValue={b.price_cents / 100} /></label>
                 </div>
                 <button className="b">Record payment</button>
               </form>
-              <div className="adm-actions" style={{ marginTop: 12 }}><Op act={act} op="payment_link" label="Email a payment link" kind="b--ghost" /></div>
+              {b.patient_email && <div className="adm-actions" style={{ marginTop: 12 }}><Op act={act} op="payment_link" label="Email a payment link" kind="b--ghost" /></div>}
             </>
           )}
           {(b.payment_status === 'paid' || b.payment_status === 'refund_pending') && onlinePaid && <Op act={act} op="refund" label={b.payment_status === 'refund_pending' ? 'Issue refund now' : 'Refund online payment'} kind={b.payment_status === 'refund_pending' ? 'b--gold' : 'b--danger'} />}
           {pays.length > 0 && (
             <table className="tbl" style={{ marginTop: 14 }}><tbody>
-              {pays.map((p) => <tr key={p.id}><td><small>{p.reference}</small><br /><small className="muted">{p.provider === 'mock' ? 'test checkout' : p.provider.replace('_', ' ')} · {p.channel ?? '–'}</small></td><td className="num">{rands(p.amount_cents)}<br /><Badge s={p.status} /></td></tr>)}
+              {pays.map((p) => (
+                <tr key={p.id}>
+                  <td><small>{p.reference}</small><br /><small className="muted">{p.provider === 'mock' ? 'test checkout' : p.provider.replace('_', ' ')} · {p.channel?.replace('_', ' ') ?? '–'}</small></td>
+                  <td className="num">{rands(p.amount_cents)}<br /><Badge s={p.status} /></td>
+                  {p.provider !== 'paystack' && (
+                    <td className="num"><form action={act}><input type="hidden" name="op" value="delete_payment" /><input type="hidden" name="payment" value={p.id} />
+                      <ConfirmButton className="b b--ghost b--sm" message={`Remove the ${rands(p.amount_cents)} payment record? This also removes it from your financials.`}>Remove</ConfirmButton></form></td>
+                  )}
+                </tr>
+              ))}
             </tbody></table>
           )}
         </div>
@@ -106,6 +117,12 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
             </form>
           </div>
         )}
+        <div className="card">
+          <h2>Delete</h2>
+          <p className="muted" style={{ margin: '0 0 14px', fontSize: '.88rem' }}>Removes this booking for good, with its payment records. Use it for mistakes, tests and duplicates; to call a visit off, cancel it instead so it stays on record.</p>
+          <form action={act}><input type="hidden" name="op" value="delete" />
+            <ConfirmButton message={`Delete ${b.patient_name}’s booking (${b.ref}) permanently? This can’t be undone.`}>Delete permanently</ConfirmButton></form>
+        </div>
       </div>
     </>
   );

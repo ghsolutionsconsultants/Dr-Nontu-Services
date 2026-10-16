@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { q } from '@/lib/db';
 import { Badge, Flash, Head, TYPE_LABEL } from '@/components/admin/ui';
 import { fmtShort, fmtTime, rands } from '@/lib/time';
+import { bulkBookings } from '../../actions';
+import { BulkBar } from '@/components/admin/BulkBar';
 
 export const metadata = { title: 'Bookings' };
 
@@ -9,10 +11,14 @@ export default async function Bookings(props: PageProps<'/admin/bookings'>) {
   const sp = await props.searchParams;
   const str = (k: string) => (typeof sp[k] === 'string' ? (sp[k] as string) : '');
   const when = str('when') || 'upcoming', status = str('status'), payment = str('payment'), search = str('q'), type = str('type');
+  const from = /^\d{4}-\d{2}-\d{2}$/.test(str('from')) ? str('from') : '', to = /^\d{4}-\d{2}-\d{2}$/.test(str('to')) ? str('to') : '';
   const where: string[] = [], args: unknown[] = [];
   const add = (sql: string, v: unknown) => { args.push(v); where.push(sql.replace('?', `$${args.length}`)); };
-  if (when === 'upcoming') where.push(`b.start_at >= now() - interval '1 hour'`);
-  if (when === 'past') where.push(`b.start_at < now()`);
+  // a date range replaces the upcoming/past shortcut
+  if (when === 'upcoming' && !from && !to) where.push(`b.start_at >= now() - interval '1 hour'`);
+  if (when === 'past' && !from && !to) where.push(`b.start_at < now()`);
+  if (from) add(`b.start_at >= (?::date)::timestamp at time zone 'Africa/Johannesburg'`, from);
+  if (to) add(`b.start_at < ((?::date) + 1)::timestamp at time zone 'Africa/Johannesburg'`, to);
   if (status) add(`b.status = ?`, status); else where.push(`b.status <> 'expired'`);
   if (payment) add(`b.payment_status = ?`, payment);
   if (type) add(`b.consult_type = ?`, type);
@@ -33,17 +39,23 @@ export default async function Bookings(props: PageProps<'/admin/bookings'>) {
         <select className="sel" name="type" defaultValue={type}><option value="">All types</option><option value="in_person">In person</option><option value="house_call">House call</option><option value="virtual">Virtual</option></select>
         <select className="sel" name="status" defaultValue={status}><option value="">Any status</option>{['confirmed', 'pending_payment', 'completed', 'cancelled', 'no_show', 'expired'].map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}</select>
         <select className="sel" name="payment" defaultValue={payment}><option value="">Any payment</option>{['unpaid', 'paid', 'refund_pending', 'refunded'].map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}</select>
+        <input className="inp" type="date" name="from" defaultValue={from} aria-label="From date" title="From" />
+        <input className="inp" type="date" name="to" defaultValue={to} aria-label="To date" title="To" />
         <input className="inp" name="q" defaultValue={search} placeholder="Name, phone, email or ref" style={{ minWidth: 220 }} />
         <button className="b b--ghost">Filter</button>
       </form>
-      <div className="card"><div className="tbl-wrap">
+      <form action={bulkBookings} className="card">
+        <input type="hidden" name="return" value={`/admin/bookings?${new URLSearchParams(Object.entries({ when, type, status, payment, q: search, from, to }).filter(([, v]) => v)).toString()}`} />
+        {rows.length > 0 && <BulkBar />}
+        <div className="tbl-wrap">
         {rows.length === 0 ? <p className="empty-s">No bookings match these filters.</p> : (
           <table className="tbl">
-            <thead><tr><th>When</th><th>Patient</th><th>Visit</th><th>Reason</th><th className="num">Fee</th><th>Status</th><th>Payment</th></tr></thead>
+            <thead><tr><th className="chk-col" aria-label="Select" /><th>When</th><th>Patient</th><th>Visit</th><th>Reason</th><th className="num">Fee</th><th>Status</th><th>Payment</th></tr></thead>
             <tbody>{rows.map((b) => (
               <tr key={b.id}>
+                <td className="chk-col"><input type="checkbox" name="ids" value={b.id} aria-label={`Select ${b.patient_name}`} /></td>
                 <td className="tnum" style={{ whiteSpace: 'nowrap' }}>{fmtShort(new Date(b.start_at))} · <b>{fmtTime(new Date(b.start_at))}</b></td>
-                <td><Link href={`/admin/bookings/${b.id}`}>{b.patient_name}</Link><br /><small className="muted">{b.ref} · {b.patient_phone}</small></td>
+                <td><Link href={`/admin/bookings/${b.id}`}>{b.patient_name}</Link><br /><small className="muted">{b.ref}{b.patient_phone && ` · ${b.patient_phone}`}</small></td>
                 <td>{TYPE_LABEL[b.consult_type]} · {b.duration_minutes} min<br /><small className="muted">{b.location_name}</small></td>
                 <td>{b.service_name ?? <span className="muted">–</span>}</td>
                 <td className="num">{rands(b.price_cents)}</td>
@@ -53,7 +65,8 @@ export default async function Bookings(props: PageProps<'/admin/bookings'>) {
             ))}</tbody>
           </table>
         )}
-      </div></div>
+        </div>
+      </form>
     </>
   );
 }

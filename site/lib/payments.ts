@@ -95,7 +95,8 @@ export async function refundPayment(p: Payment) {
 }
 
 /** Payment taken at the practice: cash, card machine or medical aid. */
-export async function recordInPersonPayment(b: Booking, channel: 'cash' | 'card_machine' | 'medical_aid', amountCents = b.price_cents) {
+export type VisitChannel = 'cash' | 'card_machine' | 'medical_aid' | 'eft';
+export async function recordInPersonPayment(b: Pick<Booking, 'id' | 'ref' | 'price_cents'>, channel: VisitChannel, amountCents = b.price_cents) {
   const reference = `${b.ref}-VISIT-${randomBytes(2).toString('hex').toUpperCase()}`;
   await q(`insert into payments (booking_id, provider, reference, amount_cents, status, channel, paid_at) values ($1,'at_visit',$2,$3,'success',$4, now())`, [b.id, reference, amountCents, channel]);
   await q(`update bookings set payment_status = 'paid', updated_at = now() where id = $1`, [b.id]);

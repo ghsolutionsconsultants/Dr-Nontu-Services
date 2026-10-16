@@ -115,12 +115,18 @@ create table if not exists bookings (
   check (busy_until >= end_at)
 );
 
--- One doctor: no two live bookings may overlap, across every location and mode.
+-- The practice may deliberately double-book someone (allow_overlap); everyone else stays one at a time.
+alter table bookings add column if not exists allow_overlap boolean not null default false;
+
+-- One doctor: no two live bookings may overlap, across every location and mode (unless double-booked on purpose).
 do $$ begin
-  alter table bookings add constraint bookings_no_overlap
-    exclude using gist (tstzrange(start_at, busy_until) with &&)
-    where (status in ('pending_payment','confirmed'));
-exception when duplicate_object or duplicate_table then null; end $$;
+  if not exists (select 1 from pg_constraint where conname = 'bookings_no_overlap' and pg_get_constraintdef(oid) like '%allow_overlap%') then
+    alter table bookings drop constraint if exists bookings_no_overlap;
+    alter table bookings add constraint bookings_no_overlap
+      exclude using gist (tstzrange(start_at, busy_until) with &&)
+      where (status in ('pending_payment','confirmed') and not allow_overlap);
+  end if;
+end $$;
 
 create index if not exists bookings_start_idx on bookings (start_at);
 create index if not exists bookings_status_idx on bookings (status);

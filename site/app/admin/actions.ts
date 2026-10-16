@@ -6,9 +6,10 @@ import { cookies } from 'next/headers';
 import { login, logout, requireAdmin } from '@/lib/auth';
 import { signSession, SESSION_COOKIE } from '@/lib/session';
 import { one, q } from '@/lib/db';
-import { BookingError, bookingById, cancelBooking, createBooking, rescheduleBooking, setStatus } from '@/lib/booking';
+import { BookingError, bookingById, cancelBooking, rescheduleBooking, setStatus } from '@/lib/booking';
 import { mailCancelled, mailConfirmed, mailPaymentLink, mailRescheduled } from '@/lib/email';
-import { paymentsForBooking, recordInPersonPayment, refundPayment } from '@/lib/payments';
+import { paymentsForBooking, recordInPersonPayment, refundPayment, type VisitChannel } from '@/lib/payments';
+import { AdminBookingInput, createAdminBookings, deleteBookings, deleteManualPayment, setStatusMany, updateAdminBooking } from '@/lib/admin-bookings';
 import { fromSast } from '@/lib/time';
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? '').trim();
@@ -45,7 +46,14 @@ export async function bookingAction(id: string, f: FormData) {
         if (f.get('notify')) { const u = await bookingById(id); if (u) await mailRescheduled(u); }
         break;
       }
-      case 'paid': await recordInPersonPayment(b!, s(f, 'channel') as 'cash' | 'card_machine' | 'medical_aid', Math.round(num(f, 'amount') * 100) || b!.price_cents); break;
+      case 'paid': await recordInPersonPayment(b!, s(f, 'channel') as VisitChannel, Math.round(num(f, 'amount') * 100) || b!.price_cents); break;
+      case 'delete_payment': await deleteManualPayment(id, num(f, 'payment')); break;
+      case 'delete': {
+        await deleteBookings([id]);
+        refresh();
+        back('/admin/bookings', `Booking ${b!.ref} for ${b!.patient_name} was deleted.`);
+        break;
+      }
       case 'refund': {
         const p = (await paymentsForBooking(id)).find((x) => x.status === 'success' && x.provider !== 'at_visit');
         if (!p) back(path, 'There is no online payment to refund.', 'err');
@@ -62,25 +70,73 @@ export async function bookingAction(id: string, f: FormData) {
     throw e;
   }
   refresh();
-  back(path, { complete: 'Marked as completed.', no_show: 'Marked as no-show.', cancel: 'Booking cancelled.', reschedule: 'Booking moved.', paid: 'Payment recorded.', refund: 'Refund issued.', payment_link: 'Payment link emailed to the patient.', resend: 'Confirmation re-sent.' }[op] ?? 'Saved.');
+  back(path, { complete: 'Marked as completed.', no_show: 'Marked as no-show.', cancel: 'Booking cancelled.', reschedule: 'Booking moved.', paid: 'Payment recorded.', delete_payment: 'Payment record removed.', refund: 'Refund issued.', payment_link: 'Payment link emailed to the patient.', resend: 'Confirmation re-sent.' }[op] ?? 'Saved.');
 }
 
-export async function createManualBooking(f: FormData) {
+export type FormState = { error?: string } | null;
+const LIVE = ['pending_payment', 'confirmed'];
+
+/** New and edited practice bookings (useActionState): errors come back to the form so nothing typed is lost. */
+export async function saveBooking(_prev: FormState, f: FormData): Promise<FormState> {
   await requireAdmin();
-  let ref = '';
+  const id = s(f, 'id') || null, pay = s(f, 'pay');
+  const parsed = AdminBookingInput.safeParse({
+    type: s(f, 'type'), location: s(f, 'location'), serviceId: s(f, 'service') ? num(f, 'service') : null,
+    duration: s(f, 'duration'), price: s(f, 'price') || 0, date: s(f, 'date'), time: s(f, 'time'), status: s(f, 'status') || 'confirmed',
+    paymentChoice: pay === 'link' ? 'online' : (s(f, 'paymentChoice') || 'at_visit'),
+    name: s(f, 'name'), email: s(f, 'email'), phone: s(f, 'phone'), dob: s(f, 'dob'), medicalAid: s(f, 'medicalAid'), medicalAidNo: s(f, 'medicalAidNo'),
+    address: s(f, 'address'), reason: s(f, 'reason'), allowOverlap: !!f.get('allowOverlap'), repeat: s(f, 'repeat') || 'none', repeatCount: s(f, 'repeatCount') || 1,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Please check the form.' };
+  if (pay === 'link' && !parsed.data.email) return { error: 'Add the patient’s email address to send a payment link.' };
+  let target = '', msg = '';
   try {
-    const b = await createBooking({
-      type: s(f, 'type') as 'in_person', location: s(f, 'location'), serviceId: num(f, 'service') || null, duration: num(f, 'duration'),
-      start: fromSast(s(f, 'date'), hm(s(f, 'time'))).toISOString(), name: s(f, 'name'), email: s(f, 'email'), phone: s(f, 'phone'),
-      address: s(f, 'address') || undefined, reason: s(f, 'reason'), payment: 'at_visit', consent: true,
-    }, { admin: true });
-    ref = b.id;
-    if (f.get('notify')) { const full = await bookingById(b.id); if (full) await mailConfirmed(full); }
+    if (id) {
+      const before = await bookingById(id);
+      const saved = await updateAdminBooking(id, parsed.data);
+      target = saved.id; msg = 'Changes saved.';
+      const full = f.get('notify') ? await bookingById(saved.id) : null;
+      if (full?.patient_email) {
+        if (full.status === 'cancelled' && before?.status !== 'cancelled') await mailCancelled(full);
+        else if (LIVE.includes(full.status) && before && +new Date(before.start_at) !== +new Date(full.start_at)) await mailRescheduled(full);
+        else if (LIVE.includes(full.status)) await mailConfirmed(full);
+        msg = 'Changes saved and the patient was emailed.';
+      }
+    } else {
+      const made = await createAdminBookings(parsed.data);
+      target = made[0].id;
+      // "already paid" is recorded against the first appointment of a series
+      if (pay === 'paid') await recordInPersonPayment(made[0], (s(f, 'channel') || 'cash') as VisitChannel, Math.round(num(f, 'amount') * 100) || made[0].price_cents);
+      for (const b of made) {
+        const full = await bookingById(b.id);
+        if (!full?.patient_email) continue;
+        if (pay === 'link' && LIVE.includes(full.status)) await mailPaymentLink(full);
+        else if (f.get('notify') && LIVE.includes(full.status)) await mailConfirmed(full);
+      }
+      msg = made.length > 1 ? `${made.length} bookings created, starting with this one.` : 'Booking created.';
+    }
   } catch (e) {
-    back('/admin/bookings/new', e instanceof Error ? e.message : 'Could not create the booking.', 'err');
+    if (e instanceof BookingError) return { error: e.message };
+    throw e;
   }
   refresh();
-  back(`/admin/bookings/${ref}`, 'Booking created.');
+  back(`/admin/bookings/${target}`, msg);
+  return null;
+}
+
+/** Bulk actions from the bookings list. */
+export async function bulkBookings(f: FormData) {
+  await requireAdmin();
+  const ids = f.getAll('ids').map(String).filter(Boolean), op = s(f, 'op');
+  const ret = s(f, 'return').startsWith('/admin/bookings') ? s(f, 'return') : '/admin/bookings';
+  if (!ids.length) back(ret, 'Tick at least one booking first.', 'err');
+  let n = 0;
+  if (op === 'delete') n = await deleteBookings(ids);
+  else if (op === 'confirmed' || op === 'completed' || op === 'no_show' || op === 'cancelled') n = await setStatusMany(ids, op);
+  else back(ret, 'Choose what to do with the selected bookings.', 'err');
+  refresh();
+  const what = { delete: 'deleted', confirmed: 'marked confirmed', completed: 'marked completed', no_show: 'marked as no-show', cancelled: 'cancelled' }[op];
+  back(ret, `${n} booking${n === 1 ? '' : 's'} ${what}.`);
 }
 
 /* ── availability ── */

@@ -18,7 +18,7 @@ export interface Booking {
   payment_choice: 'online' | 'at_visit'; payment_status: 'unpaid' | 'paid' | 'refund_pending' | 'refunded';
   patient_name: string; patient_email: string; patient_phone: string; patient_dob: string | null;
   medical_aid: string | null; medical_aid_no: string | null; home_address: string | null; reason: string;
-  manage_token: string; hold_expires_at: Date | null; source: string; created_at: Date; cancelled_at: Date | null;
+  manage_token: string; hold_expires_at: Date | null; source: string; created_at: Date; cancelled_at: Date | null; allow_overlap: boolean;
   type_name?: string; location_name?: string; location_address?: string | null; service_name?: string | null;
 }
 

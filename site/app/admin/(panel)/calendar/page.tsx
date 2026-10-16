@@ -17,7 +17,7 @@ export default function CalendarPage() {
         <Link className="b b--ghost" href="/admin/availability">Block time</Link>
         <Link className="b" href="/admin/bookings/new">New booking</Link>
       </Head>
-      <p className="muted" style={{ marginTop: -12, marginBottom: 18, fontSize: '.88rem' }}>Click an appointment to open it, or click an empty time to book someone in. Striped appointments are waiting for online payment.</p>
+      <p className="muted" style={{ marginTop: -12, marginBottom: 18, fontSize: '.88rem' }}>Click an appointment to open it. Drag it to move it, or stretch its bottom edge to change the length. Click an empty time, or drag across times, to book someone in. Striped appointments are waiting for online payment.</p>
       <AdminCalendar />
     </>
   );

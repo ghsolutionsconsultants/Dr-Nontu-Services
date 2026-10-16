@@ -13,6 +13,7 @@ interface Mail { to: string; subject: string; html: string; replyTo?: string; at
 
 /** Sends via Resend when RESEND_API_KEY is set. Every message is also kept in the outbox table. */
 export async function send(m: Mail) {
+  if (!m.to) return; // practice bookings may have no email address (walk-ins, phone patients)
   let sent = false, error: string | null = null;
   const key = process.env.RESEND_API_KEY;
   if (key) {
