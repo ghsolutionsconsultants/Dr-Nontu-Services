@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { seed, syncedContent } from './seed';
+import { resetAdminFromEnv, seed, syncedContent } from './seed';
 import { schemaSql } from './schema';
 import { parseDbUrl } from './url';
 
@@ -96,6 +96,7 @@ export function getDb(): Promise<Db> {
       const db = await connect();
       // schema changes apply themselves: a cheap version check, then a locked migration only when needed
       if (!(await upToDate(db))) await migrate(db);
+      if (process.env.ADMIN_RESET === '1') await resetAdminFromEnv(db.q);
       return db;
     })().catch((e) => { g.__dnDb = undefined; throw e; });
   }

@@ -1,5 +1,7 @@
 import { getSetting, bookingSettings } from '@/lib/booking';
-import { changePassword, saveSettings } from '../../actions';
+import { changeLogin, saveSettings } from '../../actions';
+import { requireAdmin } from '@/lib/auth';
+import { one } from '@/lib/db';
 import { Flash, Head } from '@/components/admin/ui';
 import { paymentMode } from '@/lib/payments';
 import { practice } from '@/lib/content';
@@ -8,6 +10,8 @@ export const metadata = { title: 'Settings' };
 
 export default async function Settings(props: PageProps<'/admin/settings'>) {
   const sp = await props.searchParams;
+  const me = await requireAdmin();
+  const login = await one<{ email: string }>(`select email from admins where id = $1`, [Number(me.sub)]);
   const [b, notify, areas] = await Promise.all([bookingSettings(), getSetting<string[]>('notify_emails', practice.emails), getSetting<string[]>('house_call_areas', [])]);
   const svc = [
     ['Database', process.env.DATABASE_URL ? 'Supabase / Postgres' : 'Local (PGlite)', !!process.env.DATABASE_URL],
@@ -40,11 +44,12 @@ export default async function Settings(props: PageProps<'/admin/settings'>) {
             <dl className="dl">{svc.map(([k, v, ok]) => <span key={k} style={{ display: 'contents' }}><dt>{k}</dt><dd><span className={`badge-s ${ok ? 's-paid' : 's-pending_payment'}`}>{v}</span></dd></span>)}</dl>
             <p className="muted" style={{ fontSize: '.84rem', marginBottom: 0 }}>Keys are set as environment variables on the server (see <code>.env.example</code>), never in the browser.</p>
           </div>
-          <form action={changePassword} className="card frm">
-            <h2>Change password</h2>
-            <label>Current password<input className="inp" type="password" name="current" autoComplete="current-password" required /></label>
-            <label>New password <small>10+ characters</small><input className="inp" type="password" name="next" autoComplete="new-password" minLength={10} required /></label>
-            <div><button className="b b--ghost">Change password</button></div>
+          <form action={changeLogin} className="card frm">
+            <h2>Your login</h2>
+            <label>Sign-in email<input className="inp" type="email" name="email" defaultValue={login?.email ?? me.email} autoComplete="username" required /></label>
+            <label>New password <small>10+ characters, or leave empty to keep it</small><input className="inp" type="password" name="next" autoComplete="new-password" minLength={10} /></label>
+            <label>Current password <small>to confirm it&rsquo;s you</small><input className="inp" type="password" name="current" autoComplete="current-password" required /></label>
+            <div><button className="b b--ghost">Save login</button></div>
           </form>
         </div>
       </div>

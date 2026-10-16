@@ -75,6 +75,27 @@ export async function seed(q: Query) {
 }
 
 // Creates the first admin from ADMIN_EMAIL / ADMIN_PASSWORD (see .env.local) when none exists.
+/**
+ * Recovery: with ADMIN_RESET=1 in the environment, the admin login becomes ADMIN_EMAIL / ADMIN_PASSWORD
+ * (any other admin logins are removed). Safe to leave on briefly: it only writes when the login differs.
+ */
+export async function resetAdminFromEnv(q: Query) {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase(), pw = process.env.ADMIN_PASSWORD ?? '';
+  if (!email || !/^\S+@\S+\.\S+$/.test(email) || pw.length < 10) {
+    console.warn('[admin] ADMIN_RESET is on, but ADMIN_EMAIL or ADMIN_PASSWORD (10+ characters) is missing; nothing changed.');
+    return;
+  }
+  const rows = await q<{ id: number; email: string; password_hash: string }>(`select id, email, password_hash from admins order by id`);
+  if (rows.length === 1 && rows[0].email === email && (await bcrypt.compare(pw, rows[0].password_hash))) return;
+  const hash = await bcrypt.hash(pw, 11);
+  if (!rows.length) await q(`insert into admins (email, name, password_hash) values ($1, 'Dr Nontu', $2)`, [email, hash]);
+  else {
+    await q(`delete from admins where id <> $1`, [rows[0].id]);
+    await q(`update admins set email = $2, password_hash = $3 where id = $1`, [rows[0].id, email, hash]);
+  }
+  console.info('[admin] Admin login reset from ADMIN_EMAIL / ADMIN_PASSWORD. Remove ADMIN_RESET now.');
+}
+
 async function ensureAdmin(q: Query) {
   const email = process.env.ADMIN_EMAIL, pw = process.env.ADMIN_PASSWORD;
   if (!email || !pw) return;

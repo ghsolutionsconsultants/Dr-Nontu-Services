@@ -2,7 +2,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
 import { login, logout, requireAdmin } from '@/lib/auth';
+import { signSession, SESSION_COOKIE } from '@/lib/session';
 import { one, q } from '@/lib/db';
 import { BookingError, bookingById, cancelBooking, createBooking, rescheduleBooking, setStatus } from '@/lib/booking';
 import { mailCancelled, mailConfirmed, mailPaymentLink, mailRescheduled } from '@/lib/email';
@@ -164,12 +166,18 @@ export async function saveSettings(f: FormData) {
   await set('house_call_areas', s(f, 'areas').split(/\n|,/).map((x) => x.trim()).filter(Boolean));
   refresh(true); back('/admin/settings', 'Settings saved.');
 }
-export async function changePassword(f: FormData) {
+/** Change the sign-in email and/or password. Always asks for the current password. */
+export async function changeLogin(f: FormData) {
   const me = await requireAdmin();
-  const a = await one<{ password_hash: string }>(`select password_hash from admins where id = $1`, [Number(me.sub)]);
+  const a = await one<{ email: string; name: string; password_hash: string }>(`select email, name, password_hash from admins where id = $1`, [Number(me.sub)]);
   if (!a || !(await bcrypt.compare(String(f.get('current') ?? ''), a.password_hash))) back('/admin/settings', 'Your current password is incorrect.', 'err');
-  const next = String(f.get('next') ?? '');
-  if (next.length < 10) back('/admin/settings', 'Use at least 10 characters for the new password.', 'err');
-  await q(`update admins set password_hash = $2 where id = $1`, [Number(me.sub), await bcrypt.hash(next, 11)]);
-  back('/admin/settings', 'Password changed.');
+  const email = s(f, 'email').toLowerCase(), next = String(f.get('next') ?? '');
+  if (!/^\S+@\S+\.\S+$/.test(email)) back('/admin/settings', 'Please enter a valid email address.', 'err');
+  if (next && next.length < 10) back('/admin/settings', 'Use at least 10 characters for the new password.', 'err');
+  if (email !== a!.email && (await one(`select 1 from admins where email = $1`, [email]))) back('/admin/settings', 'Another admin already uses that email.', 'err');
+  if (email === a!.email && !next) back('/admin/settings', 'Nothing to change.', 'err');
+  await q(`update admins set email = $2, password_hash = coalesce($3, password_hash) where id = $1`, [Number(me.sub), email, next ? await bcrypt.hash(next, 11) : null]);
+  // re-issue the session so the panel shows the new email straight away
+  (await cookies()).set(SESSION_COOKIE, await signSession({ sub: me.sub, email, name: a!.name }), { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 12 * 3600 });
+  back('/admin/settings', email !== a!.email && next ? 'Email and password changed.' : next ? 'Password changed.' : 'Sign-in email changed.');
 }
