@@ -26,7 +26,7 @@ export function Footer() {
       <div className="ftr-legal">
         <div className="wrap">
           <span>© {new Date().getFullYear()} {practice.name} · Practice No. {practice.practiceNo}</span>
-          <span><Link href="/privacy">Privacy Policy</Link> · <Link href="/popia">POPIA</Link> · <Link href="/terms">Terms &amp; Conditions</Link></span>
+          <span><Link href="/privacy">Privacy Policy</Link> · <Link href="/popia">POPIA</Link> · <Link href="/terms">Terms &amp; Conditions</Link> · <Link href="/admin">Admin login</Link></span>
         </div>
       </div>
     </footer>

@@ -51,6 +51,7 @@ export function Header() {
             <a className="btn btn--ghost" href={tel(practice.phones[0])} tabIndex={open ? 0 : -1}><Icon name="phone" /> Call</a>
             <MessageButton short tabIndex={open ? 0 : -1} />
           </div>
+          <Link className="mnav-admin" href="/admin" tabIndex={open ? 0 : -1}>Admin login</Link>
         </div>
       </nav>
     </header>
