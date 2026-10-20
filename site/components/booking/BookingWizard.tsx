@@ -5,11 +5,14 @@ import { DateTimePicker } from './DateTimePicker';
 import { Icon } from '../site/Icon';
 import { track } from '../site/Tracker';
 import { scrollToTop } from '../site/Effects';
+import { clock, lengthLabels, shortLength, zoneFee, type Zone } from '@/lib/fees';
+import { waLink } from '@/lib/content';
 
 export interface Catalog {
   types: { id: 'in_person' | 'house_call' | 'virtual'; name: string; description: string; requires_prepay: boolean; buffer_minutes: number; durations: { id: number; minutes: number; price_cents: number }[] }[];
   locations: { id: string; name: string; kind: string; address: string | null }[];
   services: { id: number; slug: string; name: string; summary: string; modes: string[] }[];
+  zones: Zone[];
 }
 type TypeId = Catalog['types'][number]['id'];
 
@@ -34,6 +37,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
   const [location, setLocation] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<number | null>(catalog.services.find((s) => s.slug === initial.service)?.id ?? null);
   const [duration, setDuration] = useState<number | null>(initial.duration ?? null);
+  const [zoneId, setZoneId] = useState<number | null>(null);
   const [start, setStart] = useState<string | null>(null);
   const [d, setD] = useState<Details>(EMPTY);
   const [payment, setPayment] = useState<'online' | 'at_visit'>('online');
@@ -44,9 +48,17 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const t = types.find((x) => x.id === type);
+  // a type with a single length (house calls) skips the length step
+  const single = t?.durations.length === 1;
+  const zone = catalog.zones.find((z) => z.id === zoneId);
   const locs = catalog.locations.filter((l) => type && l.kind === KIND[type]);
   const dur = t?.durations.find((x) => x.minutes === duration);
   const svc = catalog.services.find((s) => s.id === serviceId);
+  const fee = type === 'house_call' ? (zone ? zoneFee(zone, start) : null) : dur?.price_cents ?? null;
+  const labels = lengthLabels(t?.durations.map((x) => x.minutes) ?? []);
+  const fromFee = (x: Catalog['types'][number]) => x.id === 'house_call'
+    ? Math.min(...catalog.zones.map((z) => z.price_cents ?? Infinity))
+    : x.durations[0]?.price_cents;
   const loc = catalog.locations.find((l) => l.id === location);
   const servicesForType = useMemo(() => catalog.services.filter((s) => !type || s.modes.includes(MODE[type])), [catalog.services, type]);
 
@@ -55,7 +67,8 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
     const nt = types.find((x) => x.id === id)!, nl = catalog.locations.filter((l) => l.kind === KIND[id]);
     setType(id);
     setLocation(nl.length === 1 ? nl[0].id : nl.some((l) => l.id === location) ? location : null);
-    if (duration && !nt.durations.some((x) => x.minutes === duration)) setDuration(null);
+    if (nt.durations.length === 1) setDuration(nt.durations[0].minutes);
+    else if (duration && !nt.durations.some((x) => x.minutes === duration)) setDuration(null);
     if (nt.requires_prepay) setPayment('online');
     setStart(null);
   };
@@ -73,13 +86,14 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
 
   const canNext = [
     !!type,
-    !!location && (type !== 'house_call' || d.address.trim().length > 5),
+    !!location && (type !== 'house_call' || (!!zone && zone.price_cents != null && d.address.trim().length > 5)),
     !!duration,
     !!start,
     true,
     true,
   ];
-  const go = (n: number) => {
+  const go = (to: number) => {
+    const n = to === 2 && single ? (to > step ? 3 : 1) : to;
     if (n === 4) restoreDraft();
     setDir(n > step ? 'fwd' : 'back'); setStep(n); setServerError(null);
     const top = bodyRef.current?.getBoundingClientRect().top ?? 0;
@@ -102,7 +116,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
     try {
       const r = await fetch('/api/bookings', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, location, serviceId, duration, start, payment, ...d, consent: d.consent === true }),
+        body: JSON.stringify({ type, location, serviceId, zoneId, duration, start, payment, ...d, consent: d.consent === true }),
       });
       const j = await r.json();
       if (!r.ok) {
@@ -127,7 +141,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
   const primary = step < 5
     ? <button className="btn btn--light" disabled={!canNext[step]} onClick={() => (step === 4 ? validate() && go(5) : go(step + 1))}>Continue <Icon name="arrow" /></button>
     : <button className="btn btn--light" disabled={submitting} onClick={submit}>
-        {submitting ? 'One moment…' : payment === 'online' ? <>Pay {dur ? rands(dur.price_cents) : ''} &amp; book <Icon name="arrow" /></> : <>Confirm booking <Icon name="arrow" /></>}
+        {submitting ? 'One moment…' : payment === 'online' ? <>Pay {fee != null ? rands(fee) : ''} &amp; book <Icon name="arrow" /></> : <>Confirm booking <Icon name="arrow" /></>}
       </button>;
 
   return (
@@ -149,7 +163,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
                 {types.map((x) => (
                   <button key={x.id} className="choice" aria-pressed={type === x.id} onClick={() => { chooseType(x.id); setDir('fwd'); setStep(1); }}>
                     <Icon name={ICON[x.id]} /><b>{x.name}</b><small>{SUB[x.id]}</small>
-                    {x.durations[0] && <span className="from">From {rands(x.durations[0].price_cents)}</span>}
+                    {Number.isFinite(fromFee(x)) && <span className="from">From {rands(fromFee(x))}</span>}
                   </button>
                 ))}
               </div>
@@ -168,7 +182,24 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
                 </div>
               )}
               {type === 'house_call' && (
-                <div className="field">
+                <div className="field-group" style={{ marginTop: 0 }}>
+                  <h4>Where are you?</h4>
+                  <div className="choice-grid zone-grid">
+                    {catalog.zones.map((z) => z.price_cents == null ? (
+                      <a key={z.id} className="choice choice--link" href={waLink(`Hi, I'd like a quote for a house call (${z.name.toLowerCase()}). My address is: `)} target="_blank" rel="noopener">
+                        <Icon name="pin" /><b>{z.name}</b><small>{z.note || 'WhatsApp us for a quote'}</small><span className="from">Get a quote →</span>
+                      </a>
+                    ) : (
+                      <button key={z.id} type="button" className="choice" aria-pressed={zoneId === z.id} onClick={() => setZoneId(z.id)}>
+                        <Icon name="pin" /><b>{z.name}</b>{z.note && <small>{z.note}</small>}
+                        <span className="from">{rands(z.price_cents)}{z.evening_price_cents != null && z.evening_from != null ? ` · ${rands(z.evening_price_cents)} from ${clock(z.evening_from)}` : ''}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {type === 'house_call' && (
+                <div className="field" style={{ marginTop: 22 }}>
                   <label htmlFor="addr">Home address <small>street, suburb, city</small></label>
                   <textarea id="addr" rows={2} value={d.address} onChange={set('address')} placeholder="e.g. 12 Example Street, Esther Park, Kempton Park" autoComplete="street-address" />
                 </div>
@@ -185,13 +216,13 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
               <h3>How long do you need?</h3>
               <p className="muted">Choose the length that fits. A quick script or follow-up suits a shorter visit; a new or complex concern, a longer one.</p>
               <div className="dur-grid">
-                {t.durations.map((x) => (
+                {t.durations.map((x, i) => (
                   <button key={x.id} className="dur" aria-pressed={duration === x.minutes} onClick={() => { setDuration(x.minutes); }}>
-                    <b>{x.minutes} min</b><span>{rands(x.price_cents)}</span>
+                    <b>{shortLength(labels[i])}</b><span>{rands(x.price_cents)}</span>
                   </button>
                 ))}
               </div>
-              {t.buffer_minutes >= 15 && <p className="muted" style={{ fontSize: '.88rem', marginTop: 16 }}>Travel time is added between house calls automatically. It doesn&rsquo;t change your fee.</p>}
+
             </>}
 
             {step === 3 && type && location && duration && <>
@@ -250,7 +281,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
           <div className="sum-row"><span>Where</span><span>{type === 'house_call' ? (d.address ? d.address.split(',')[0] : 'Your home') : loc?.name ?? (type === 'virtual' ? 'Video call' : '—')}</span></div>
           <div className="sum-row"><span>Length</span><span className="tnum">{duration ? `${duration} minutes` : '—'}</span></div>
           <div className="sum-row"><span>When</span><span className="tnum">{start ? fmtWhen.format(new Date(start)) : '—'}</span></div>
-          <div className="sum-total"><span>Fee</span><b>{dur ? rands(dur.price_cents) : '—'}</b></div>
+          <div className="sum-total"><span>Fee</span><b>{fee != null ? rands(fee) : '—'}</b></div>
           {step >= 4 && t && (
             <div className="pay" role="radiogroup" aria-label="Payment">
               <label><input type="radio" name="pay" checked={payment === 'online'} onChange={() => setPayment('online')} /><span>Pay now, securely<small>Card, Instant EFT or Apple Pay via Paystack</small></span></label>
@@ -265,7 +296,7 @@ export function BookingWizard({ catalog, initial }: { catalog: Catalog; initial:
       {step > 0 && (
         <div className="book-bar">
           <button className="book-back" onClick={() => go(step - 1)} aria-label="Back to the previous step"><Icon name="arrow" /></button>
-          <div className="book-bar-sum"><small>Step {step + 1} of {STEPS.length}</small><b className="tnum">{dur ? rands(dur.price_cents) : t?.name ?? ''}</b></div>
+          <div className="book-bar-sum"><small>Step {step + 1} of {STEPS.length}</small><b className="tnum">{fee != null ? rands(fee) : t?.name ?? ''}</b></div>
           {primary}
         </div>
       )}

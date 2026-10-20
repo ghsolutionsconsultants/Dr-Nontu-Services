@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { PageHero, SecHead } from '@/components/site/Sections';
 import { Icon } from '@/components/site/Icon';
-import { img, photos } from '@/lib/content';
+import { img, photos, waLink } from '@/lib/content';
+import { clock } from '@/lib/fees';
 import { getCatalog } from '@/lib/booking';
 import { rands } from '@/lib/time';
 import { pageMeta } from '@/lib/seo';
@@ -11,8 +12,7 @@ export const dynamic = 'force-dynamic';
 export const generateMetadata = () => pageMeta('/house-calls');
 
 export default async function HouseCalls() {
-  const { types } = await getCatalog();
-  const hc = types.find((t) => t.id === 'house_call');
+  const { zones } = await getCatalog();
   return (
     <>
       <PageHero eyebrow="House calls" title={<>Healthcare, <em>wherever you are.</em></>} photo={photos.door} photoAlt="A green front door framed by climbing plants" shape="pill"
@@ -23,8 +23,8 @@ export default async function HouseCalls() {
         <div className="wrap">
           <SecHead eyebrow="How it works" title={<>Three steps <em>to your door.</em></>} />
           <ol className="steps">
-            <li className="rv"><h3>Book a time</h3><p>Choose how long you need and a time between 09:00 and 16:00, any day of the week.</p></li>
-            <li className="rv"><h3>Tell us where</h3><p>Add your address and anything we should know, like gate codes or parking. We confirm your area.</p></li>
+            <li className="rv"><h3>Tell us where</h3><p>Choose your area to see the fee, then add your address and anything we should know, like gate codes or parking.</p></li>
+            <li className="rv"><h3>Book a time</h3><p>Pick a time between 09:00 and 16:00, any day of the week. We confirm your address and fee.</p></li>
             <li className="rv"><h3>We come to you</h3><p>Dr Nontu arrives with everything needed for a full consultation, at home.</p></li>
           </ol>
         </div>
@@ -39,13 +39,16 @@ export default async function HouseCalls() {
             </ul>
           </div>
           <div className="c7-12 rv">
-            {hc && (
-              <table className="fees-table">
-                <thead><tr><th>House call length</th><th>Fee</th></tr></thead>
-                <tbody>{hc.durations.map((d) => <tr key={d.id}><td>{d.minutes} minutes</td><td><b>{rands(d.price_cents)}</b></td></tr>)}</tbody>
-              </table>
-            )}
-            <p className="muted" style={{ fontSize: '.9rem' }}>Includes travel within our service area. Pay online when you book, or at the visit.</p>
+            <table className="fees-table">
+              <thead><tr><th>Where you are</th><th>Fee</th></tr></thead>
+              <tbody>{zones.flatMap((z) => z.price_cents == null
+                ? [<tr key={z.id}><td>{z.name}</td><td><a className="link-u" href={waLink(`Hi, I'd like a quote for a house call (${z.name.toLowerCase()}).`)} target="_blank" rel="noopener">WhatsApp for a quote</a></td></tr>]
+                : z.evening_price_cents != null && z.evening_from != null
+                  ? [<tr key={z.id}><td>{z.name}<br /><small className="muted">before {clock(z.evening_from)}</small></td><td><b>{rands(z.price_cents)}</b></td></tr>,
+                     <tr key={`${z.id}e`}><td>{z.name}<br /><small className="muted">{clock(z.evening_from)} – 22:00</small></td><td><b>{rands(z.evening_price_cents)}</b></td></tr>]
+                  : [<tr key={z.id}><td>{z.name}</td><td><b>{rands(z.price_cents)}</b></td></tr>])}</tbody>
+            </table>
+            <p className="muted" style={{ fontSize: '.9rem' }}>Travel is included. Pay online when you book, or at the visit.</p>
             <div className="ph soft rv" style={{ aspectRatio: '16/10', marginTop: 24 }}>
               
               <img src={img(photos.armchairs, 900)} alt="Two cream armchairs beside a plant" loading="lazy" />

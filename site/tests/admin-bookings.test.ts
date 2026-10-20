@@ -13,7 +13,7 @@ const { recordInPersonPayment } = await import('../lib/payments');
 const base: AdminBookingInput = {
   type: 'in_person', location: 'esther-park', serviceId: null, duration: 30, price: 650, date: '2027-03-02', time: '10:00',
   status: 'confirmed', paymentChoice: 'at_visit', name: 'Test Patient', email: '', phone: '', dob: '',
-  medicalAid: null, medicalAidNo: null, address: null, reason: '', allowOverlap: false, repeat: 'none', repeatCount: 1,
+  medicalAid: null, medicalAidNo: null, address: null, reason: '', allowOverlap: false, zone: null, repeat: 'none', repeatCount: 1,
 };
 
 describe('practice bookings', () => {
@@ -65,6 +65,16 @@ describe('practice bookings', () => {
     expect((await one<{ payment_status: string }>(`select payment_status from bookings where id = $1`, [b.id]))?.payment_status).toBe('unpaid');
     expect(await ab.deleteBookings([a.id, b.id])).toBe(2);
     expect((await q(`select 1 from payments where booking_id = any($1::uuid[])`, [[a.id, b.id]])).length).toBe(0);
+  });
+
+  it('seeds Dr Nontu’s fees, and keeps the area on a house call', async () => {
+    const fees = await q<{ consult_type: string; minutes: number; price_cents: number }>(`select consult_type, minutes, price_cents from consult_durations where active order by consult_type, minutes`);
+    expect(fees.filter((f) => f.consult_type === 'in_person').map((f) => [f.minutes, f.price_cents])).toEqual([[15, 55000], [30, 70000], [60, 90000]]);
+    expect(fees.filter((f) => f.consult_type === 'virtual').map((f) => [f.minutes, f.price_cents])).toEqual([[15, 35000], [30, 50000]]);
+    const zones = await q<{ name: string; price_cents: number | null }>(`select name, price_cents from house_call_zones order by sort`);
+    expect(zones.map((z) => z.price_cents)).toEqual([60000, 120000, 140000, 160000, null]);
+    const [b] = await ab.createAdminBookings({ ...base, type: 'house_call', address: '1 Test Street', zone: 'Up to 5 km', price: 1200, date: '2027-08-03' });
+    expect([b.location_id, b.house_zone, b.price_cents]).toEqual(['home', 'Up to 5 km', 120000]);
   });
 
   it('changes many statuses at once; cancelling a paid one flags a refund', async () => {

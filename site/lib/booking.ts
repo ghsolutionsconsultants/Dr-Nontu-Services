@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { q, one, tx, type Query } from './db';
 import { slotsForDay, type Interval, type Rule } from './slots';
 import { addDays, dateKey, fromSast, monthDays } from './time';
+import { zoneFee, type Zone } from './fees';
 
 export type ConsultTypeId = 'in_person' | 'house_call' | 'virtual';
 
@@ -18,7 +19,7 @@ export interface Booking {
   payment_choice: 'online' | 'at_visit'; payment_status: 'unpaid' | 'paid' | 'refund_pending' | 'refunded';
   patient_name: string; patient_email: string; patient_phone: string; patient_dob: string | null;
   medical_aid: string | null; medical_aid_no: string | null; home_address: string | null; reason: string;
-  manage_token: string; hold_expires_at: Date | null; source: string; created_at: Date; cancelled_at: Date | null; allow_overlap: boolean;
+  manage_token: string; hold_expires_at: Date | null; source: string; created_at: Date; cancelled_at: Date | null; allow_overlap: boolean; house_zone: string | null;
   type_name?: string; location_name?: string; location_address?: string | null; service_name?: string | null;
 }
 
@@ -36,15 +37,16 @@ export async function getSetting<T>(key: string, fallback: T): Promise<T> {
 export const bookingSettings = () => getSetting<BookingSettings>('booking', { cancelCutoffHours: 24, leadMinutes: 120, holdMinutes: 15, slotStepMinutes: 15, maxDaysAhead: 60 });
 
 export async function getCatalog() {
-  const [types, durations, locations, services, settings] = await Promise.all([
+  const [types, durations, locations, services, settings, zones] = await Promise.all([
     q<Omit<ConsultType, 'durations'>>(`select id, name, description, buffer_minutes, requires_prepay, active from consult_types where active order by sort`),
     q<{ id: number; consult_type: string; minutes: number; price_cents: number }>(`select id, consult_type, minutes, price_cents from consult_durations where active order by minutes`),
     q<Location>(`select id, name, kind, address, map_url, parking from locations order by sort`),
     q<Service>(`select id, slug, name, summary, modes, image from services where bookable order by sort`),
     bookingSettings(),
+    q<Zone>(`select id, name, note, price_cents, evening_price_cents, evening_from from house_call_zones where active order by sort`),
   ]);
   const ct: ConsultType[] = types.map((t) => ({ ...t, durations: durations.filter((d) => d.consult_type === t.id).map(({ id, minutes, price_cents }) => ({ id, minutes, price_cents })) }));
-  return { types: ct, locations, services, settings };
+  return { types: ct, locations, services, settings, zones };
 }
 
 /** Which location ids a consult type may use. */
@@ -98,6 +100,7 @@ export const BookingInput = z.object({
   type: z.enum(['in_person', 'house_call', 'virtual']),
   location: z.string().min(1),
   serviceId: z.coerce.number().int().positive().nullable().optional(),
+  zoneId: z.coerce.number().int().positive().nullable().optional(), // house calls: which area
   duration: z.coerce.number().int().positive(),
   start: z.string().datetime({ offset: true }),
   name: z.string().trim().min(2, 'Please enter your full name').max(120),
@@ -129,6 +132,11 @@ export async function createBooking(input: BookingInput, opts: { admin?: boolean
   if (!loc) throw new BookingError('invalid', 'Please choose a valid location.');
   if (type.id === 'house_call' && !input.address) throw new BookingError('invalid', 'Please enter the address for the house call.');
   const start = new Date(input.start);
+  // house calls are priced by area (and time of day), everything else by length
+  const zone = type.id === 'house_call' ? cat.zones.find((zz) => zz.id === input.zoneId) : undefined;
+  if (type.id === 'house_call' && !zone) throw new BookingError('invalid', 'Please choose where you are, so we can show the house-call fee.');
+  const price = zone ? zoneFee(zone, start) : dur.price_cents;
+  if (price == null) throw new BookingError('invalid', 'House calls that far are quoted personally. Please WhatsApp or call us.');
 
   if (!opts.admin) {
     const slots = await getSlots({ type: type.id, location: loc.id, duration: dur.minutes, date: dateKey(start) });
@@ -146,12 +154,12 @@ export async function createBooking(input: BookingInput, opts: { admin?: boolean
       const [b] = await qq<Booking>(
         `insert into bookings (ref, consult_type, location_id, service_id, duration_minutes, price_cents, start_at, end_at, busy_until, status,
           payment_choice, patient_name, patient_email, patient_phone, patient_dob, medical_aid, medical_aid_no, home_address, reason,
-          consent_at, manage_token, hold_expires_at, source)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, now(), $20, $21, $22) returning *`,
-        [newRef(), type.id, loc.id, input.serviceId ?? null, dur.minutes, dur.price_cents, start, end, busyUntil, status,
+          consent_at, manage_token, hold_expires_at, source, house_zone)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, now(), $20, $21, $22, $23) returning *`,
+        [newRef(), type.id, loc.id, input.serviceId ?? null, dur.minutes, price, start, end, busyUntil, status,
           payment, input.name, input.email.toLowerCase(), input.phone, input.dob || null, input.medicalAid || null, input.medicalAidNo || null,
           input.address || null, input.reason ?? '', newToken(),
-          status === 'pending_payment' ? new Date(Date.now() + s.holdMinutes * 60_000) : null, opts.admin ? 'admin' : 'web']);
+          status === 'pending_payment' ? new Date(Date.now() + s.holdMinutes * 60_000) : null, opts.admin ? 'admin' : 'web', zone?.name ?? null]);
       return b;
     });
   } catch (e) {

@@ -37,7 +37,7 @@ export async function seed(q: Query) {
     await set('notify_emails', practice.emails);
     await set('booking', { cancelCutoffHours: 24, leadMinutes: 120, holdMinutes: 15, slotStepMinutes: 15, maxDaysAhead: 60 });
     await set('house_call_areas', []); // empty = accept any address, practice confirms
-    await set('fees_are_placeholder', true);
+    await set('fees_are_placeholder', false);
 
     for (const [i, l] of locations.entries())
       await q(`insert into locations (id, name, kind, address, map_url, parking, sort) values ($1,$2,'clinic',$3,$4,$5,$6)`,
@@ -49,13 +49,23 @@ export async function seed(q: Query) {
       ('house_call','House call','Professional medical care in the comfort of your home.',30,false,1),
       ('virtual','Virtual','Consult remotely by video from wherever you are.',0,true,2)`);
 
-    // TODO(client): placeholder fees, to be replaced in Admin → Fees before launch
+    // Dr Nontu's fees (Oct 2026). In person and virtual by length; house calls by area (below), so their one length has no fee.
     const dur: [string, number, number][] = [
-      ['in_person', 15, 45000], ['in_person', 30, 65000], ['in_person', 45, 85000], ['in_person', 60, 105000],
-      ['house_call', 30, 120000], ['house_call', 45, 145000], ['house_call', 60, 170000],
-      ['virtual', 15, 35000], ['virtual', 30, 55000], ['virtual', 45, 75000],
+      ['in_person', 15, 55000], ['in_person', 30, 70000], ['in_person', 60, 90000],
+      ['virtual', 15, 35000], ['virtual', 30, 50000],
+      ['house_call', 60, 0],
     ];
     for (const d of dur) await q(`insert into consult_durations (consult_type, minutes, price_cents) values ($1,$2,$3)`, d);
+    const zones: [string, string, number | null, number | null, number | null][] = [
+      ['The Parks Lifestyle Apartments', 'Fourways', 60000, 80000, 19 * 60],
+      ['Up to 5 km', '', 120000, null, null],
+      ['More than 5 km, up to 10 km', '', 140000, null, null],
+      ['More than 10 km, up to 15 km', '', 160000, null, null],
+      ['Beyond 15 km', 'WhatsApp us for a quote', null, null, null],
+    ];
+    for (const [i, z] of zones.entries())
+      await q(`insert into house_call_zones (name, note, price_cents, evening_price_cents, evening_from, sort) values ($1,$2,$3,$4,$5,$6)`, [...z, i]);
+    await set('fees_2026_10', true);
 
     for (const [i, s] of services.entries())
       await q(`insert into services (slug, name, summary, body, modes, image, sort) values ($1,$2,$3,$4,$5,$6,$7)`,

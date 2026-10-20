@@ -161,3 +161,11 @@
 .bulk-all input,.chk-col input{width:17px;height:17px;accent-color:var(--moss);cursor:pointer}
 .tbl .chk-col{width:34px;padding-right:0}
 .b:disabled{opacity:.45;cursor:not-allowed}
+
+/* house-call areas: one editable row per area */
+.zone-list{display:grid;gap:8px}
+.zone-row{display:grid;grid-template-columns:minmax(160px,1.6fr) minmax(110px,1fr) 110px 120px 110px 28px 120px;gap:8px;align-items:center}
+.zone-head{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--earth);font-weight:600}
+.zone-btns{display:flex;gap:6px}
+@media (max-width:900px){.zone-head{display:none}}
+@media (max-width:900px){.zone-row{grid-template-columns:1fr 1fr;padding-bottom:10px;border-bottom:1px solid var(--rule)}.zone-row>.b,.zone-btns{grid-column:1 / -1}}

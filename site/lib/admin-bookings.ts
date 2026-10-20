@@ -34,6 +34,7 @@ export const AdminBookingInput = z.object({
   address: optional(240),
   reason: z.string().trim().max(2000),
   allowOverlap: z.boolean(),
+  zone: z.string().trim().max(120).optional().transform((v) => v || null),
   repeat: z.enum(['none', '1w', '2w', '4w']).default('none'),
   repeatCount: z.coerce.number().int().min(1).max(26).default(1),
 });
@@ -89,11 +90,11 @@ export async function createAdminBookings(input: AdminBookingInput): Promise<Boo
         const [b] = await qq<Booking>(
           `insert into bookings (ref, consult_type, location_id, service_id, duration_minutes, price_cents, start_at, end_at, busy_until, status,
              payment_choice, patient_name, patient_email, patient_phone, patient_dob, medical_aid, medical_aid_no, home_address, reason,
-             consent_at, manage_token, source, allow_overlap, cancelled_at)
-           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, now(), $20, 'admin', $21, $22) returning *`,
+             consent_at, manage_token, source, allow_overlap, cancelled_at, house_zone)
+           values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19, now(), $20, 'admin', $21, $22, $23) returning *`,
           [newRef(), input.type, location, input.serviceId, input.duration, Math.round(input.price * 100), s, end, busyUntil, input.status,
             input.paymentChoice, input.name, input.email.toLowerCase(), input.phone, input.dob || null, input.medicalAid, input.medicalAidNo,
-            input.address, input.reason, newToken(), input.allowOverlap, input.status === 'cancelled' ? new Date() : null]);
+            input.address, input.reason, newToken(), input.allowOverlap, input.status === 'cancelled' ? new Date() : null, input.type === 'house_call' ? input.zone : null]);
         out.push(b);
       }
       return out;
@@ -118,14 +119,14 @@ export async function updateAdminBooking(id: string, input: AdminBookingInput): 
          reminder_sent_at = case when start_at <> $7 then null else reminder_sent_at end,
          start_at = $7, end_at = $8, busy_until = $9, status = $10, payment_choice = $11,
          patient_name = $12, patient_email = $13, patient_phone = $14, patient_dob = $15, medical_aid = $16, medical_aid_no = $17,
-         home_address = $18, reason = $19, allow_overlap = $20,
+         home_address = $18, reason = $19, allow_overlap = $20, house_zone = $21,
          cancelled_at = case when $10 = 'cancelled' then coalesce(cancelled_at, now()) else null end,
          hold_expires_at = case when $10 = 'pending_payment' then hold_expires_at else null end,
          updated_at = now()
        where id = $1 returning *`,
       [id, input.type, location, input.serviceId, input.duration, Math.round(input.price * 100), start, end, busyUntil, input.status,
         input.paymentChoice, input.name, input.email.toLowerCase(), input.phone, input.dob || null, input.medicalAid, input.medicalAidNo,
-        input.address, input.reason, input.allowOverlap]);
+        input.address, input.reason, input.allowOverlap, input.type === 'house_call' ? input.zone : null]);
     if (!b) throw new BookingError('not_found', 'That booking no longer exists.');
     return b;
   } catch (e) {

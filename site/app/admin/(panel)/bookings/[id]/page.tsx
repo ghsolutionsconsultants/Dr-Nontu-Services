@@ -38,7 +38,7 @@ export default async function BookingDetail(props: PageProps<'/admin/bookings/[i
           <dl className="dl">
             <dt>When</dt><dd><b>{fmtWhen(start)}</b></dd>
             <dt>Visit</dt><dd>{TYPE_LABEL[b.consult_type]} · {b.duration_minutes} minutes</dd>
-            <dt>Where</dt><dd>{b.consult_type === 'house_call' ? b.home_address : `${b.location_name}${b.location_address ? ' · ' + b.location_address : ''}`}</dd>
+            <dt>Where</dt><dd>{b.consult_type === 'house_call' ? `${b.home_address ?? ''}${b.house_zone ? ` (${b.house_zone})` : ''}` : `${b.location_name}${b.location_address ? ' · ' + b.location_address : ''}`}</dd>
             <dt>Reason</dt><dd>{b.service_name ?? '–'}{b.reason && <><br /><span className="muted">{b.reason}</span></>}</dd>
             <dt>Fee</dt><dd>{rands(b.price_cents)} · {b.payment_choice === 'online' ? 'paying online' : 'paying at visit'}</dd>
             <dt>Booked</dt><dd>{fmtShort(new Date(b.created_at))} {fmtTime(new Date(b.created_at))} · {b.source === 'admin' ? 'by the practice' : 'online'}</dd>

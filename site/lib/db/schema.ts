@@ -47,6 +47,18 @@ create table if not exists consult_durations (
   unique (consult_type, minutes)
 );
 
+-- House calls are priced by where the patient is (not by length), optionally with an evening fee.
+create table if not exists house_call_zones (
+  id                  serial primary key,
+  name                text not null,
+  note                text not null default '',
+  price_cents         int check (price_cents >= 0),          -- null: quote on request, not bookable online
+  evening_price_cents int check (evening_price_cents >= 0),
+  evening_from        int check (evening_from between 0 and 1440), -- minutes after midnight, SAST
+  sort                int not null default 0,
+  active              boolean not null default true
+);
+
 create table if not exists services (
   id        serial primary key,
   slug      text unique not null,
@@ -117,6 +129,8 @@ create table if not exists bookings (
 
 -- The practice may deliberately double-book someone (allow_overlap); everyone else stays one at a time.
 alter table bookings add column if not exists allow_overlap boolean not null default false;
+-- the house-call area the fee was based on (kept as text, so later edits to areas don't rewrite history)
+alter table bookings add column if not exists house_zone text;
 
 -- One doctor: no two live bookings may overlap, across every location and mode (unless double-booked on purpose).
 do $$ begin
@@ -237,6 +251,25 @@ update seo_pages set title = 'Membership | Dr Nontu Medical Practice',
 -- The contact page description no longer promises WhatsApp (only if never edited).
 update seo_pages set description = 'Practices in Esther Park (Kempton Park) and Fourways. Call, send a message or book online.'
  where path = '/contact' and description = 'Practices in Esther Park (Kempton Park) and Fourways. Call, WhatsApp or book online.';
+-- Dr Nontu's fees (Oct 2026), applied once to an existing database; later edits in Admin → Fees stay.
+do $$ begin
+  if exists (select 1 from consult_types) and not exists (select 1 from settings where key = 'fees_2026_10') then
+    delete from consult_durations where consult_type in ('in_person', 'virtual', 'house_call');
+    insert into consult_durations (consult_type, minutes, price_cents) values
+      ('in_person', 15, 55000), ('in_person', 30, 70000), ('in_person', 60, 90000),
+      ('virtual', 15, 35000), ('virtual', 30, 50000),
+      ('house_call', 60, 0);
+    delete from house_call_zones;
+    insert into house_call_zones (name, note, price_cents, evening_price_cents, evening_from, sort) values
+      ('The Parks Lifestyle Apartments', 'Fourways', 60000, 80000, 1140, 0),
+      ('Up to 5 km', '', 120000, null, null, 1),
+      ('More than 5 km, up to 10 km', '', 140000, null, null, 2),
+      ('More than 10 km, up to 15 km', '', 160000, null, null, 3),
+      ('Beyond 15 km', 'WhatsApp us for a quote', null, null, null, 4);
+    update settings set value = 'false'::jsonb where key = 'fees_are_placeholder';
+    insert into settings (key, value) values ('fees_2026_10', 'true'::jsonb);
+  end if;
+end $$;
 -- Repair: some drivers stored settings as a JSON string containing JSON; unwrap those (safe to re-run).
 update settings set value = (value #>> '{}')::jsonb
  where jsonb_typeof(value) = 'string' and (left(value #>> '{}', 1) in ('{', '[') or (value #>> '{}') in ('true', 'false'));

@@ -1,17 +1,19 @@
 'use client';
 import { useActionState, useState } from 'react';
 import type { FormState } from '@/app/admin/actions';
+import { lengthLabels, zoneFee, type Zone } from '@/lib/fees';
 
 type TypeId = 'in_person' | 'house_call' | 'virtual';
 export interface FormCatalog {
   types: { id: TypeId; name: string; durations: { minutes: number; price_cents: number }[] }[];
   locations: { id: string; name: string; kind: string }[];
   services: { id: number; name: string; modes: string[] }[];
+  zones: Zone[];
 }
 export interface FormValues {
   id?: string; type: TypeId; location?: string; serviceId?: number | null; duration: number; price: number; date: string; time: string;
   status: string; paymentChoice: 'online' | 'at_visit'; name?: string; email?: string; phone?: string; dob?: string;
-  medicalAid?: string | null; medicalAidNo?: string | null; address?: string | null; reason?: string; allowOverlap?: boolean;
+  medicalAid?: string | null; medicalAidNo?: string | null; address?: string | null; reason?: string; allowOverlap?: boolean; zone?: string | null;
 }
 
 const MODE: Record<TypeId, string> = { in_person: 'clinic', house_call: 'house', virtual: 'screen' };
@@ -30,6 +32,15 @@ export function BookingForm({ catalog, initial, action }: {
   const [pay, setPay] = useState<'at_visit' | 'paid' | 'link'>('at_visit');
   const [repeat, setRepeat] = useState('none');
   const [email, setEmail] = useState(initial.email ?? '');
+  const [time, setTime] = useState(initial.time);
+  const [date, setDate] = useState(initial.date);
+  const [zone, setZone] = useState(initial.zone ?? '');
+  // house calls: the area sets the fee (with the evening fee from its time); the fee box can still be changed
+  const feeFor = (name: string, d = date, tm = time) => {
+    const z = catalog.zones.find((x) => x.name === name);
+    const fee = z ? zoneFee(z, new Date(`${d}T${tm}:00+02:00`)) : null;
+    if (fee != null) setPrice(rand(fee));
+  };
 
   const t = catalog.types.find((x) => x.id === type)!;
   const presets = t?.durations ?? [];
@@ -41,6 +52,7 @@ export function BookingForm({ catalog, initial, action }: {
     const same = catalog.types.find((x) => x.id === id)?.durations.find((d) => d.minutes === Number(duration));
     if (same) setPrice(rand(same.price_cents));
   };
+  const labels = lengthLabels(presets.map((d) => d.minutes));
   const statuses = STATUS.some(([v]) => v === initial.status) ? STATUS : [[initial.status, initial.status.replace('_', ' ')] as [string, string], ...STATUS];
 
   return (
@@ -66,14 +78,22 @@ export function BookingForm({ catalog, initial, action }: {
             {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select></label>
         </div>
-        {type === 'house_call' && <label>Home address<input className="inp" name="address" defaultValue={initial.address ?? ''} placeholder="Street, suburb, city" required /></label>}
+        {type === 'house_call' && (
+          <div className="frm-row">
+            <label>Area <small>sets the fee</small><select className="sel" name="zone" value={zone} onChange={(e) => { setZone(e.target.value); feeFor(e.target.value); }}>
+              <option value="">Not specified</option>
+              {catalog.zones.map((z) => <option key={z.id} value={z.name}>{z.name}{z.price_cents == null ? ' (quote)' : ` · R${rand(z.price_cents)}${z.evening_price_cents != null ? ` / R${rand(z.evening_price_cents)} evening` : ''}`}</option>)}
+            </select></label>
+            <label>Home address<input className="inp" name="address" defaultValue={initial.address ?? ''} placeholder="Street, suburb, city" required /></label>
+          </div>
+        )}
 
         <div className="frm-group">
           <span className="frm-label">Length</span>
           <div className="chips-a">
             {presets.map((d) => (
-              <button type="button" key={d.minutes} aria-pressed={Number(duration) === d.minutes} onClick={() => pick(d.minutes, d.price_cents)}>
-                {d.minutes} min <small>R{rand(d.price_cents)}</small>
+              <button type="button" key={d.minutes} aria-pressed={Number(duration) === d.minutes} onClick={() => (type === 'house_call' ? setDuration(String(d.minutes)) : pick(d.minutes, d.price_cents))}>
+                {d.minutes} min {type === 'house_call' ? <small>fee by area</small> : <small>{labels[presets.indexOf(d)]} · R{rand(d.price_cents)}</small>}
               </button>
             ))}
           </div>
@@ -81,8 +101,8 @@ export function BookingForm({ catalog, initial, action }: {
         <div className="frm-row">
           <label>Minutes <small>any length</small><input className="inp" name="duration" type="number" min={5} max={720} step={5} value={duration} onChange={(e) => setDuration(e.target.value)} required /></label>
           <label>Fee (R) <small>edit for a discount or no charge</small><input className="inp" name="price" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required /></label>
-          <label>Date <small>past dates are fine</small><input className="inp" name="date" type="date" defaultValue={initial.date} required /></label>
-          <label>Time <small>any time</small><input className="inp" name="time" type="time" step={60} defaultValue={initial.time} required /></label>
+          <label>Date <small>past dates are fine</small><input className="inp" name="date" type="date" value={date} onChange={(e) => { setDate(e.target.value); if (type === 'house_call' && zone) feeFor(zone, e.target.value); }} required /></label>
+          <label>Time <small>any time</small><input className="inp" name="time" type="time" step={60} value={time} onChange={(e) => { setTime(e.target.value); if (type === 'house_call' && zone) feeFor(zone, date, e.target.value); }} required /></label>
         </div>
         <div className="frm-row">
           <label>Status<select className="sel" name="status" value={status} onChange={(e) => setStatus(e.target.value)}>

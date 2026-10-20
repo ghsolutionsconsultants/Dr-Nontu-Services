@@ -85,7 +85,7 @@ export async function saveBooking(_prev: FormState, f: FormData): Promise<FormSt
     duration: s(f, 'duration'), price: s(f, 'price') || 0, date: s(f, 'date'), time: s(f, 'time'), status: s(f, 'status') || 'confirmed',
     paymentChoice: pay === 'link' ? 'online' : (s(f, 'paymentChoice') || 'at_visit'),
     name: s(f, 'name'), email: s(f, 'email'), phone: s(f, 'phone'), dob: s(f, 'dob'), medicalAid: s(f, 'medicalAid'), medicalAidNo: s(f, 'medicalAidNo'),
-    address: s(f, 'address'), reason: s(f, 'reason'), allowOverlap: !!f.get('allowOverlap'), repeat: s(f, 'repeat') || 'none', repeatCount: s(f, 'repeatCount') || 1,
+    address: s(f, 'address'), reason: s(f, 'reason'), allowOverlap: !!f.get('allowOverlap'), zone: s(f, 'zone'), repeat: s(f, 'repeat') || 'none', repeatCount: s(f, 'repeatCount') || 1,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Please check the form.' };
   if (pay === 'link' && !parsed.data.email) return { error: 'Add the patient’s email address to send a payment link.' };
@@ -189,6 +189,34 @@ export async function deleteDuration(id: number) {
   await requireAdmin();
   await q(`delete from consult_durations where id = $1`, [id]);
   refresh(true); back('/admin/fees', 'Appointment length removed.');
+}
+
+/* ── house-call areas (fees by where the patient is) ── */
+const zoneFields = (f: FormData) => {
+  const cents = (k: string) => (s(f, k) === '' ? null : Math.round(num(f, k) * 100));
+  const [h, m] = s(f, 'evening_from').split(':').map(Number);
+  return { name: s(f, 'name'), note: s(f, 'note'), price: cents('price'), evening: cents('evening_price'), from: Number.isFinite(h) ? h * 60 + (m || 0) : null };
+};
+export async function saveZone(id: number, f: FormData) {
+  await requireAdmin();
+  const z = zoneFields(f);
+  if (!z.name) back('/admin/fees', 'Give the area a name.', 'err');
+  await q(`update house_call_zones set name = $2, note = $3, price_cents = $4, evening_price_cents = $5, evening_from = $6, active = $7 where id = $1`,
+    [id, z.name, z.note, z.price, z.evening, z.evening == null ? null : z.from, !!f.get('active')]);
+  refresh(true); back('/admin/fees', 'House-call area saved.');
+}
+export async function addZone(f: FormData) {
+  await requireAdmin();
+  const z = zoneFields(f);
+  if (!z.name) back('/admin/fees', 'Give the area a name.', 'err');
+  await q(`insert into house_call_zones (name, note, price_cents, evening_price_cents, evening_from, sort) values ($1,$2,$3,$4,$5, (select coalesce(max(sort),0)+1 from house_call_zones))`,
+    [z.name, z.note, z.price, z.evening, z.evening == null ? null : z.from]);
+  refresh(true); back('/admin/fees', 'House-call area added.');
+}
+export async function deleteZone(id: number) {
+  await requireAdmin();
+  await q(`delete from house_call_zones where id = $1`, [id]);
+  refresh(true); back('/admin/fees', 'House-call area removed.');
 }
 
 /* ── SEO ── */
